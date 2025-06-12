@@ -124,139 +124,131 @@ const RepoSummary = () => {
 
       return `# ${repo.name} - 이력서용 요약
 
-              ## 📋 프로젝트 개요
-              ${data.project_intro}
+## 📋 프로젝트 개요
+${data.project_intro}
 
-              ## 🛠 주요 기술 스택
-              - **언어**: ${topLanguages}
-              ${
-                data.tech_stack.backend.join(", ") &&
-                `- **백엔드**: ${data.tech_stack.backend.join(", ")}`
-              }
-              ${
-                data.tech_stack.database.join(", ") &&
-                `- **데이터베이스**: ${data.tech_stack.database.join(", ")}`
-              }
-              ${
-                data.tech_stack.testing.join(", ") &&
-                `- **테스팅**: ${data.tech_stack.testing.join(", ")}`
-              }
-              ${
-                data.tech_stack.frontend.join(", ") &&
-                `- **프론트앤드**: ${data.tech_stack.frontend.join(", ")}`
-              }
-              ${
-                data.tech_stack.other &&
-                data.tech_stack.other.length > 0 &&
-                `- **추가**:\n${data.tech_stack.other
-                  .map((item) => `  - ${item.replace(/^-\s*/, "").trim()}`)
-                  .join("\n")}`
-              }
+## 🛠 주요 기술 스택
+- **언어**: ${topLanguages}
+${
+  data.tech_stack.backend.join(", ") &&
+  `- **백엔드**: ${data.tech_stack.backend.join(", ")}`
+}
+${
+  data.tech_stack.database.join(", ") &&
+  `- **데이터베이스**: ${data.tech_stack.database.join(", ")}`
+}
+${
+  data.tech_stack.testing.join(", ") &&
+  `- **테스팅**: ${data.tech_stack.testing.join(", ")}`
+}
+${
+  data.tech_stack.frontend.join(", ") &&
+  `- **프론트앤드**: ${data.tech_stack.frontend.join(", ")}`
+}
+${
+  data.tech_stack.other &&
+  data.tech_stack.other.length > 0 &&
+  `- **추가**:\n${data.tech_stack.other
+    .map((item) => `  - ${item.replace(/^-\s*/, "").trim()}`)
+    .join("\n")}`
+}
 
 
-              ## 📊 프로젝트 성과
-              - **분석된 커밋**: ${data.performance_metrics.commits_analyzed}개
-              - **분석된 파일**: ${data.performance_metrics.files_analyzed}개
-              - **총 파일 수**: ${data.performance_metrics.branch_total_files}개
+## 📊 프로젝트 성과
+- **분석된 커밋**: ${data.performance_metrics.commits_analyzed}개
+- **분석된 파일**: ${data.performance_metrics.files_analyzed}개
+- **총 파일 수**: ${data.performance_metrics.branch_total_files}개
 
-              ## 🎯 주요 성취사항
-              ${data.resume_bullets
-                .map((bullet) => {
-                  try {
-                    const parsed = JSON.parse(bullet);
-                    const title = parsed.title.replace(/^:+|:+$/g, "").trim();
-                    const content = parsed.content
-                      .replace(/^:+|:+$/g, "")
-                      .trim();
+## 🎯 주요 성취사항
+${data.resume_bullets
+  .map((bullet) => {
+    try {
+      const parsed = JSON.parse(bullet);
+      const title = parsed.title.replace(/^:+|:+$/g, "").trim();
+      const content = parsed.content.replace(/^:+|:+$/g, "").trim();
 
-                    // title과 content가 같으면 하나만 표시
-                    if (title === content) {
-                      return `- ${title}`;
-                    }
+      // title과 content가 같으면 하나만 표시
+      if (title === content) {
+        return `- ${title}`;
+      }
 
-                    // title이 content에 포함되어 있으면 content만 표시
-                    if (content.includes(title)) {
-                      return `- ${content}`;
-                    }
+      // title이 content에 포함되어 있으면 content만 표시
+      if (content.includes(title)) {
+        return `- ${content}`;
+      }
 
-                    // 둘 다 의미있는 내용이면 연결
-                    return `- ${title}: ${content}`;
-                  } catch {
-                    return `- ${bullet}`;
-                  }
-                })
-                .join("\n")}
+      // 둘 다 의미있는 내용이면 연결
+      return `- ${title}: ${content}`;
+    } catch {
+      return `- ${bullet}`;
+    }
+  })
+  .join("\n")}
 
-              ## 🔧 기술적 도전과 해결
-              ${(() => {
-                // refactoring_history 텍스트를 일관된 Markdown 리스트로 포맷팅
-                const formatRefactoringHistory = (text: string) => {
-                  // 먼저 모든 "- " 패턴을 찾아서 배열로 분리
-                  const items = text
-                    .split(/\s*-\s+/)
-                    .filter((item) => item.trim().length > 0);
+## 🔧 기술적 도전과 해결
+${(() => {
+  // refactoring_history 텍스트를 일관된 Markdown 리스트로 포맷팅
+  const formatRefactoringHistory = (text: string) => {
+    // 먼저 모든 "- " 패턴을 찾아서 배열로 분리
+    const items = text
+      .split(/\s*-\s+/)
+      .filter((item) => item.trim().length > 0);
 
-                  return items
-                    .map((item) => {
-                      // 각 아이템을 정리하고 "- "를 앞에 붙임
-                      const cleanItem = item
-                        .trim()
-                        .replace(/^-+\s*/, "") // 앞의 불필요한 대시 제거
-                        .replace(/\s+/g, " ") // 여러 공백을 하나로 통일
-                        .trim();
+    return items
+      .map((item) => {
+        // 각 아이템을 정리하고 "- "를 앞에 붙임
+        const cleanItem = item
+          .trim()
+          .replace(/^-+\s*/, "") // 앞의 불필요한 대시 제거
+          .replace(/\s+/g, " ") // 여러 공백을 하나로 통일
+          .trim();
 
-                      return `- ${cleanItem}`;
-                    })
-                    .join("\n");
-                };
+        return `- ${cleanItem}`;
+      })
+      .join("\n");
+  };
 
-                return formatRefactoringHistory(data.refactoring_history);
-              })()}
+  return formatRefactoringHistory(data.refactoring_history);
+})()}
 
-              ## 📅 프로젝트 기간
-              ${(() => {
-                const createdDate = new Date(repo.created_at);
-                const updatedDate = new Date(repo.updated_at);
+## 📅 프로젝트 기간
+${(() => {
+  const createdDate = new Date(repo.created_at);
+  const updatedDate = new Date(repo.updated_at);
 
-                // 날짜 유효성 검사
-                const isValidCreated = !isNaN(createdDate.getTime());
-                const isValidUpdated = !isNaN(updatedDate.getTime());
+  // 날짜 유효성 검사
+  const isValidCreated = !isNaN(createdDate.getTime());
+  const isValidUpdated = !isNaN(updatedDate.getTime());
 
-                if (!isValidCreated && !isValidUpdated) {
-                  return "날짜 정보를 확인할 수 없습니다.";
-                }
+  if (!isValidCreated && !isValidUpdated) {
+    return "날짜 정보를 확인할 수 없습니다.";
+  }
 
-                const formatDate = (date: Date) => {
-                  return date.toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  });
-                };
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
-                const createdStr = isValidCreated
-                  ? formatDate(createdDate)
-                  : "알 수 없음";
-                const updatedStr = isValidUpdated
-                  ? formatDate(updatedDate)
-                  : "알 수 없음";
+  const createdStr = isValidCreated ? formatDate(createdDate) : "알 수 없음";
+  const updatedStr = isValidUpdated ? formatDate(updatedDate) : "알 수 없음";
 
-                // 프로젝트 진행 기간 계산
-                if (isValidCreated && isValidUpdated) {
-                  const diffTime = Math.abs(
-                    updatedDate.getTime() - createdDate.getTime()
-                  );
-                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  // 프로젝트 진행 기간 계산
+  if (isValidCreated && isValidUpdated) {
+    const diffTime = Math.abs(updatedDate.getTime() - createdDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                  return `**시작일**: ${createdStr}  
-              **최근 업데이트**: ${updatedStr}  
-              **진행 기간**: 약 ${diffDays}일`;
-                }
+    return `**시작일**: ${createdStr}  
+**최근 업데이트**: ${updatedStr}  
+**진행 기간**: 약 ${diffDays}일`;
+  }
 
-                return `**시작일**: ${createdStr}  
-              **최근 업데이트**: ${updatedStr}`;
-              })()}
-              `;
+  return `**시작일**: ${createdStr}  
+**최근 업데이트**: ${updatedStr}`;
+})()}
+`;
     },
     []
   );
