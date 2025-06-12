@@ -7,7 +7,7 @@ import type {
   GitHubBranchResponse,
   GitHubRepository,
   SummaryData,
-} from "../../types/apis/github-repo";
+} from "../../types/apis";
 import type { APIResponse } from "../../types/apis";
 type SummaryType = "resume" | "retrospective" | "portfolio" | "documentation";
 
@@ -119,7 +119,10 @@ const RepoSummary = () => {
     (data: SummaryData, repo: GitHubRepository) => {
       const topLanguages = data.performance_metrics.top_languages
         .slice(0, 3)
-        .map((lang) => `${lang.language} (${lang.percentage}%)`)
+        .map(
+          (lang: { language: string; percentage: number }) =>
+            `${lang.language} (${lang.percentage}%)`
+        )
         .join(", ");
 
       return `# ${repo.name} - 이력서용 요약
@@ -149,7 +152,7 @@ ${
   data.tech_stack.other &&
   data.tech_stack.other.length > 0 &&
   `- **추가**:\n${data.tech_stack.other
-    .map((item) => `  - ${item.replace(/^-\s*/, "").trim()}`)
+    .map((item: string) => `  - ${item.replace(/^-\s*/, "").trim()}`)
     .join("\n")}`
 }
 
@@ -161,7 +164,7 @@ ${
 
 ## 🎯 주요 성취사항
 ${data.resume_bullets
-  .map((bullet) => {
+  .map((bullet: string) => {
     try {
       const parsed = JSON.parse(bullet);
       const title = parsed.title.replace(/^:+|:+$/g, "").trim();
