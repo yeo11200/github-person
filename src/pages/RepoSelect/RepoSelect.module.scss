@@ -1,0 +1,614 @@
+.repoSelect {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 0;
+  margin: 0;
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem 0;
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 1240px) {
+    max-width: 95%;
+    padding: 0 1rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0 0.75rem;
+    max-width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 0.5rem;
+  }
+
+  @media (max-width: 360px) {
+    padding: 0 0.25rem;
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: white;
+
+  @media (max-width: 768px) {
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 1.5rem;
+  }
+
+  .title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+
+    @media (max-width: 1024px) {
+      font-size: 2.2rem;
+    }
+
+    @media (max-width: 768px) {
+      font-size: 2rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1.75rem;
+    }
+
+    @media (max-width: 360px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 360px) {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: white;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    min-height: 40vh;
+    padding: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    min-height: 30vh;
+    padding: 1rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+
+    @media (max-width: 480px) {
+      width: 32px;
+      height: 32px;
+      border-width: 3px;
+    }
+  }
+
+  p {
+    font-size: 1.1rem;
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: white;
+  text-align: center;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    min-height: 40vh;
+    padding: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    min-height: 30vh;
+    padding: 1rem;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1.3rem;
+    }
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .loginBtn,
+  .retryBtn {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 1rem;
+
+    @media (max-width: 480px) {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .searchBox {
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+
+    .searchInput {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+
+      @media (max-width: 480px) {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 360px) {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+      }
+
+      &::placeholder {
+        color: #999;
+      }
+    }
+  }
+
+  .sortBox {
+    flex-shrink: 0;
+    box-sizing: border-box;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+
+    .sortSelect {
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      min-width: 200px;
+      box-sizing: border-box;
+
+      @media (max-width: 768px) {
+        width: 100%;
+        min-width: auto;
+      }
+
+      @media (max-width: 480px) {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 360px) {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+}
+
+.repoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 0 0 1.5rem 0;
+  }
+
+  @media (max-width: 480px) {
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 360px) {
+    gap: 0.75rem;
+  }
+}
+
+.repoCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+    border-radius: 10px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 360px) {
+    padding: 0.75rem;
+    border-radius: 6px;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+    @media (max-width: 768px) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  .repoCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .repoCardTitle {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+      flex: 1;
+      margin-right: 1rem;
+      word-break: break-word;
+
+      @media (max-width: 768px) {
+        font-size: 1.2rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.1rem;
+        margin-right: 0;
+      }
+    }
+
+    .repoCardMeta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-end;
+
+      @media (max-width: 480px) {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .privateLabel {
+        background: #ffeaa7;
+        color: #d63031;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        white-space: nowrap;
+
+        @media (max-width: 480px) {
+          font-size: 0.7rem;
+          padding: 0.2rem 0.4rem;
+        }
+      }
+
+      .languageLabel {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        white-space: nowrap;
+
+        @media (max-width: 480px) {
+          font-size: 0.7rem;
+          padding: 0.2rem 0.4rem;
+        }
+      }
+    }
+  }
+
+  .repoCardDescription {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    flex: 1;
+    word-break: break-word;
+
+    @media (max-width: 768px) {
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+  }
+
+  .repoCardStats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+
+    @media (max-width: 768px) {
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-top: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.85rem;
+      color: #666;
+
+      @media (max-width: 768px) {
+        font-size: 0.8rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 0.75rem;
+      }
+
+      .statIcon {
+        font-size: 1rem;
+
+        @media (max-width: 480px) {
+          font-size: 0.9rem;
+        }
+      }
+
+      .statValue {
+        font-weight: 500;
+      }
+    }
+  }
+
+  .repoCardActions {
+    margin-top: auto;
+
+    .summaryBtn {
+      display: block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.2s ease;
+      width: 100%;
+      font-size: 1rem;
+      box-sizing: border-box;
+
+      @media (max-width: 768px) {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 6px;
+      }
+
+      &:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+
+        @media (max-width: 768px) {
+          transform: none;
+          opacity: 0.95;
+        }
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+.emptyState {
+  text-align: center;
+  color: white;
+  font-size: 1.1rem;
+  padding: 3rem 0;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 2rem 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    padding: 1.5rem 0;
+  }
+}
