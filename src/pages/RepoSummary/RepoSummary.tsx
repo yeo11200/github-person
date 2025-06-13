@@ -85,6 +85,7 @@ const RepoSummary = () => {
       setSummaryContent(summeryGetResponse.data);
     } catch (error) {
       console.error("Failed to fetch summary data:", error);
+      setSummaryContent(undefined);
     }
   }, [owner, repoId, selectedBranch]);
 
