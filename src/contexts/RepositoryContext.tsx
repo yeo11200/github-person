@@ -12,6 +12,7 @@ import type {
   GitHubReposResponse,
   Repository,
 } from "../types/apis/github-repo";
+import { useMyAgent } from "../store/useMyAgent";
 
 interface RepositoryContextType {
   repositories: Repository[];
@@ -34,6 +35,8 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
   children,
 }) => {
   const { isAuthenticated } = useAuth();
+  const fetchMyData = useMyAgent((state) => state.fetchMyData);
+
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -45,6 +48,8 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
       setLoading(false);
       return;
     }
+
+    fetchMyData();
 
     try {
       setLoading(true);
@@ -71,7 +76,7 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchMyData]);
 
   // 레포지토리 새로고침
   const refreshRepositories = useCallback(async () => {

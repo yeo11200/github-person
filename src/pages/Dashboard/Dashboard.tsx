@@ -2,61 +2,93 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRepository } from "../../contexts/RepositoryContext";
 import styles from "./Dashboard.module.scss";
+import { useMyAgent } from "../../store/useMyAgent";
+import dayjs from "dayjs";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { repoCount } = useRepository();
   const navigate = useNavigate();
-  // 임시 데이터 (실제로는 API에서 가져올 데이터)
-  // const recentSummaries = [
-  //   {
-  //     id: 1,
-  //     repoName: "my-awesome-project",
-  //     summaryType: "이력서용",
-  //     createdAt: "2024-01-15",
-  //     status: "완료",
-  //   },
-  //   {
-  //     id: 2,
-  //     repoName: "react-todo-app",
-  //     summaryType: "회고용",
-  //     createdAt: "2024-01-14",
-  //     status: "진행중",
-  //   },
-  //   {
-  //     id: 3,
-  //     repoName: "node-api-server",
-  //     summaryType: "포트폴리오용",
-  //     createdAt: "2024-01-13",
-  //     status: "완료",
-  //   },
-  // ];
+  const myData = useMyAgent((state) => state.myData);
 
-  const stats = {
-    totalRepos: 12,
-    totalSummaries: 8,
-    thisMonthSummaries: 3,
+  // 임시 사용자 통계 데이터
+  const userStats = {
+    totalRepos: repoCount,
+    summarizedRepos: myData.removeDuplicatesSummary,
+    totalSummaries: myData.count,
+    thisMonthSummaries: myData.monthCount,
+    // favoriteLanguage: "TypeScript",
+    joinDate: dayjs(myData.create_at).format("YYYY-MM-DD"),
+  };
+
+  const recentActivity = myData.repositorySummary;
+
+  const handleGoToRepoSummary = (owner: string, repoId: string) => {
+    navigate(`/repositories/${owner}/${repoId}/summary`);
+  };
+
+  const getActivityIcon = () => {
+    return "📋";
+
+    // switch (type) {
+    //   case "summary_created":
+    //     return "📝";
+    //   case "repo_connected":
+    //     return "🔗";
+    //   case "summary_downloaded":
+    //     return "💾";
+    //   default:
+    //     return "📋";
+    // }
   };
 
   return (
     <div className={styles.dashboard}>
       <div className={styles.container}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>
-            안녕하세요, {user?.name || "사용자"}님! 👋
-          </h1>
-          <p className={styles.subtitle}>
-            오늘도 멋진 프로젝트를 요약해보세요.
-          </p>
+        {/* 사용자 프로필 헤더 */}
+        <header className={styles.profileHeader}>
+          <div className={styles.userInfo}>
+            <div className={styles.avatar}>
+              <img
+                src={user?.avatar_url || "/default-avatar.png"}
+                alt={user?.name || "사용자"}
+                className={styles.avatarImg}
+              />
+            </div>
+            <div className={styles.userDetails}>
+              <h1 className={styles.userName}>{user?.name || "사용자"}님</h1>
+              <p className={styles.userEmail}>
+                {user?.username || "이메일 없음"}
+              </p>
+              <p className={styles.joinDate}>{userStats.joinDate} 가입</p>
+            </div>
+          </div>
+          {/* <div className={styles.headerActions}>
+            <button className={styles.editProfileBtn}>프로필 편집</button>
+          </div> */}
         </header>
 
+        {/* 통계 섹션 */}
         <section className={styles.stats}>
+          <h2 className={styles.sectionTitle}>통계 현황</h2>
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <div className={styles.statCardIcon}>📁</div>
               <div className={styles.statCardContent}>
-                <h3 className={styles.statCardNumber}>{repoCount}</h3>
+                <h3 className={styles.statCardNumber}>
+                  {userStats.totalRepos}
+                </h3>
                 <p className={styles.statCardLabel}>연결된 레포지토리</p>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statCardIcon}>✅</div>
+              <div className={styles.statCardContent}>
+                <h3 className={styles.statCardNumber}>
+                  {userStats.summarizedRepos}
+                </h3>
+                <p className={styles.statCardLabel}>요약된 레포지토리</p>
               </div>
             </div>
 
@@ -64,7 +96,7 @@ const Dashboard = () => {
               <div className={styles.statCardIcon}>📊</div>
               <div className={styles.statCardContent}>
                 <h3 className={styles.statCardNumber}>
-                  {stats.totalSummaries}
+                  {userStats.totalSummaries}
                 </h3>
                 <p className={styles.statCardLabel}>총 요약 개수</p>
               </div>
@@ -74,54 +106,54 @@ const Dashboard = () => {
               <div className={styles.statCardIcon}>🗓️</div>
               <div className={styles.statCardContent}>
                 <h3 className={styles.statCardNumber}>
-                  {stats.thisMonthSummaries}
+                  {userStats.thisMonthSummaries}
                 </h3>
                 <p className={styles.statCardLabel}>이번 달 요약</p>
               </div>
             </div>
+
+            {/* {userStats?.favoriteLanguage && (
+              <div className={styles.statCard}>
+                <div className={styles.statCardIcon}>💻</div>
+                <div className={styles.statCardContent}>
+                  <h3 className={styles.statCardNumber}>
+                    {userStats.favoriteLanguage}
+                  </h3>
+                  <p className={styles.statCardLabel}>주요 언어</p>
+                </div>
+              </div>
+            )} */}
           </div>
         </section>
 
-        {/* <section className={styles.recent}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>최근 요약</h2>
-            <button className={styles.viewAllBtn}>전체 보기</button>
-          </div>
-
-          <div className={styles.summaryList}>
-            {recentSummaries.map((summary) => (
-              <div key={summary.id} className={styles.summaryItem}>
-                <div className={styles.summaryItemInfo}>
-                  <h3 className={styles.summaryItemRepoName}>
-                    {summary.repoName}
-                  </h3>
-                  <div className={styles.summaryItemMeta}>
-                    <span className={styles.summaryItemType}>
-                      {summary.summaryType}
-                    </span>
-                    <span className={styles.summaryItemDate}>
-                      {summary.createdAt}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.summaryItemActions}>
-                  <span
-                    className={`${styles.summaryItemStatus} ${
-                      summary.status === "완료"
-                        ? styles.summaryItemStatusCompleted
-                        : styles.summaryItemStatusPending
-                    }`}
-                  >
-                    {summary.status}
+        {/* 최근 활동 섹션 */}
+        <section className={styles.recentActivity}>
+          <h2 className={styles.sectionTitle}>최근 요약 활동</h2>
+          <div className={styles.activityList}>
+            {recentActivity.map((activity, index) => (
+              <div
+                key={index}
+                className={styles.activityItem}
+                onClick={() =>
+                  handleGoToRepoSummary(activity.owner, activity.name)
+                }
+              >
+                <div className={styles.activityIcon}>{getActivityIcon()}</div>
+                <div className={styles.activityContent}>
+                  <h3 className={styles.activityRepo}>{activity.name}</h3>
+                  <p className={styles.activityDescription}>
+                    {activity.description || activity.language}
+                  </p>
+                  <span className={styles.activityDate}>
+                    {dayjs(activity.updated_at).format("YYYY-MM-DD HH:mm")}
                   </span>
-                  <button className={styles.summaryItemViewBtn}>보기</button>
                 </div>
               </div>
             ))}
           </div>
-        </section> */}
+        </section>
 
+        {/* 빠른 작업 섹션 */}
         <section className={styles.quickActions}>
           <h2 className={styles.sectionTitle}>빠른 작업</h2>
           <div className={styles.quickActionsGrid}>
@@ -141,9 +173,61 @@ const Dashboard = () => {
             <button className={styles.quickActionBtn}>
               <span className={styles.quickActionBtnIcon}>⚙️</span>
               <span className={styles.quickActionBtnText}>설정</span>
+            </button>
+
+            <button className={styles.quickActionBtn}>
+              <span className={styles.quickActionBtnIcon}>📊</span>
+              <span className={styles.quickActionBtnText}>통계 보기</span>
             </button> */}
           </div>
         </section>
+
+        {/* 설정 섹션 */}
+        {/* <section className={styles.preferences}>
+          <h2 className={styles.sectionTitle}>설정</h2>
+          <div className={styles.preferencesForm}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>기본 요약 형식</label>
+              <select className={styles.formSelect}>
+                <option value="markdown">Markdown</option>
+                <option value="notion">Notion</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>기본 요약 타입</label>
+              <select className={styles.formSelect}>
+                <option value="resume">이력서용</option>
+                <option value="portfolio">포트폴리오용</option>
+                <option value="retrospective">회고용</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  defaultChecked
+                />
+                이메일 알림 받기
+              </label>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  defaultChecked
+                />
+                새로운 기능 알림 받기
+              </label>
+            </div>
+
+            <button className={styles.saveBtn}>설정 저장</button>
+          </div>
+        </section> */}
       </div>
     </div>
   );

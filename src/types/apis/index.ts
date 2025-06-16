@@ -4,3 +4,4 @@ export interface APIResponse<T> {
   message?: string;
 }
 export * from "./github-repo"; // 또는 "githubRepo"
+export * from "./github-my";
