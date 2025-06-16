@@ -7,8 +7,15 @@ import {
   type ReactNode,
 } from "react";
 import fetchApi from "../utils/fetch-api";
-import type { User } from "../types/auth";
 
+export interface User {
+  id: string;
+  email?: string;
+  name: string;
+  username: string;
+  avatar_url: string;
+  access_token: string;
+}
 // 인증 컨텍스트 타입 정의
 interface AuthContextType {
   user: User | null;
