@@ -15,7 +15,7 @@ const RepoSummary = () => {
   const { repoId, owner } = useParams<{ repoId: string; owner: string }>();
   const [repository, setRepository] = useState<GitHubRepository | null>(null);
   const [branches, setBranches] = useState<string[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<string>("main");
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [branchesLoading, setBranchesLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<SummaryType>("resume");
@@ -440,9 +440,7 @@ ${(() => {
             {generatingType === activeTab ? (
               <div className={styles.generating}>
                 <div className={styles.generatingSpinner}></div>
-                <p>
-                  AI가 {selectedBranch} 브랜치의 요약을 생성하고 있습니다...
-                </p>
+                <p>AI가 {selectedBranch} 브랜치의 요약을 생성하고 있습니다.</p>
               </div>
             ) : currentSummary ? (
               <div className={styles.summaryContent}>
