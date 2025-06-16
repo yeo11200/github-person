@@ -67,9 +67,6 @@ const Header = () => {
               <Link to="/repositories" className={styles.navLink}>
                 레포지토리
               </Link>
-              <Link to="/profile" className={styles.navLink}>
-                프로필
-              </Link>
               <button onClick={logout} className={styles.logoutBtn}>
                 로그아웃
               </button>

@@ -7,16 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import fetchApi from "../utils/fetch-api";
-
-// 사용자 타입 정의
-export interface User {
-  id: string;
-  email?: string;
-  name: string;
-  username: string;
-  avatar_url: string;
-  access_token: string;
-}
+import type { User } from "../types/auth";
 
 // 인증 컨텍스트 타입 정의
 interface AuthContextType {
@@ -52,8 +43,21 @@ interface GitHubCallbackResponse {
 // 컨텍스트 생성
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+// 인증 컨텍스트를 사용하는 커스텀 훅
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
 // 인증 프로바이더 컴포넌트
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -142,6 +146,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 로그아웃 함수
   const logout = () => {
+    window.location.href = "/";
+
     setUser(null);
     localStorage.removeItem("github_token");
     localStorage.removeItem("github_user");
@@ -157,13 +163,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-// 인증 컨텍스트를 사용하는 커스텀 훅
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
+};
