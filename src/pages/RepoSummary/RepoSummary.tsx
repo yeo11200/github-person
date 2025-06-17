@@ -11,6 +11,16 @@ import type {
 import type { APIResponse } from "../../types/apis";
 type SummaryType = "resume" | "retrospective" | "portfolio" | "documentation";
 
+// 로딩 메시지 배열 (재미있는 요소)
+const LOADING_MESSAGES = [
+  { text: "코드를 분석하고 있어요... 🔍", duration: 3000 },
+  { text: "커밋 히스토리를 읽고 있어요... 📚", duration: 4000 },
+  { text: "기술 스택을 파악하고 있어요... 🛠️", duration: 3000 },
+  { text: "프로젝트 구조를 이해하고 있어요... 🏗️", duration: 4000 },
+  { text: "최고의 요약을 작성하고 있어요... ✨", duration: 3000 },
+  { text: "마지막 검토 중이에요... 🎯", duration: 3000 },
+];
+
 const RepoSummary = () => {
   const { repoId, owner } = useParams<{ repoId: string; owner: string }>();
   const [repository, setRepository] = useState<GitHubRepository | null>(null);
@@ -24,10 +34,57 @@ const RepoSummary = () => {
     null
   );
 
+  // 로딩 애니메이션 상태
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
+
   // 상수를 컴포넌트 외부로 이동하여 안정적인 참조 생성
   const TABS_CONFIG = [
     { id: "resume" as SummaryType, label: "이력서용", icon: "📄" },
   ];
+
+  // 로딩 애니메이션 효과
+  useEffect(() => {
+    if (generatingType) {
+      setLoadingProgress(0);
+      setCurrentMessageIndex(0);
+      setLoadingStartTime(Date.now());
+
+      const progressInterval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev >= 95) return prev; // 95%에서 멈춤 (완료되면 100%로)
+          return prev + Math.random() * 2 + 0.5; // 랜덤하게 증가
+        });
+      }, 200);
+
+      // 메시지 변경 로직
+      let messageTimeout: NodeJS.Timeout;
+      let currentIndex = 0;
+
+      const scheduleNextMessage = () => {
+        if (currentIndex < LOADING_MESSAGES.length - 1) {
+          messageTimeout = setTimeout(() => {
+            currentIndex++;
+            setCurrentMessageIndex(currentIndex);
+            scheduleNextMessage();
+          }, LOADING_MESSAGES[currentIndex].duration);
+        }
+      };
+
+      scheduleNextMessage();
+
+      return () => {
+        clearInterval(progressInterval);
+        if (messageTimeout) clearTimeout(messageTimeout);
+      };
+    } else {
+      setLoadingProgress(0);
+      setCurrentMessageIndex(0);
+      setLoadingStartTime(null);
+    }
+  }, [generatingType]);
+
   // fetchRepositoryAndBranches를 useCallback으로 메모이제이션
   const fetchRepositoryAndBranches = useCallback(async () => {
     if (!repoId || !owner) return;
@@ -103,6 +160,9 @@ const RepoSummary = () => {
         );
 
         if (summaryResponse.status === "success") {
+          // 완료 시 프로그레스를 100%로 설정
+          setLoadingProgress(100);
+          await new Promise((resolve) => setTimeout(resolve, 500)); // 완료 애니메이션을 위한 잠시 대기
           await summaryGetData();
         }
 
@@ -439,8 +499,57 @@ ${(() => {
           <div className={styles.contentBody}>
             {generatingType === activeTab ? (
               <div className={styles.generating}>
-                <div className={styles.generatingSpinner}></div>
-                <p>AI가 {selectedBranch} 브랜치의 요약을 생성하고 있습니다.</p>
+                <div className={styles.loadingContainer}>
+                  <div className={styles.loadingIcon}>
+                    <div className={styles.generatingSpinner}></div>
+                    <div className={styles.aiIcon}>🤖</div>
+                  </div>
+
+                  <div className={styles.loadingContent}>
+                    <h3 className={styles.loadingTitle}>
+                      AI가 열심히 분석 중이에요!
+                    </h3>
+                    <p className={styles.loadingMessage}>
+                      {LOADING_MESSAGES[currentMessageIndex].text}
+                    </p>
+
+                    <div className={styles.progressContainer}>
+                      <div className={styles.progressBar}>
+                        <div
+                          className={styles.progressFill}
+                          style={{ width: `${loadingProgress}%` }}
+                        ></div>
+                      </div>
+                      <div className={styles.progressText}>
+                        {Math.round(loadingProgress)}% 완료
+                      </div>
+                    </div>
+
+                    <div className={styles.timeEstimate}>
+                      {loadingStartTime && (
+                        <span>
+                          예상 소요 시간: 최대 20초 ⏰
+                          {(() => {
+                            const elapsed = Math.floor(
+                              (Date.now() - loadingStartTime) / 1000
+                            );
+                            const remaining = Math.max(0, 20 - elapsed);
+                            return remaining > 0
+                              ? ` (약 ${remaining}초 남음)`
+                              : " (곧 완료됩니다!)";
+                          })()}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className={styles.loadingTips}>
+                      <p>
+                        💡 <strong>팁:</strong> 더 정확한 분석을 위해 시간이
+                        걸려요!
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : currentSummary ? (
               <div className={styles.summaryContent}>
