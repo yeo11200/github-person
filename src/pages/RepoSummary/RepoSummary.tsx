@@ -56,7 +56,7 @@ const RepoSummary = () => {
           if (prev >= 95) return prev; // 95%에서 멈춤 (완료되면 100%로)
           return prev + Math.random() * 2 + 0.5; // 랜덤하게 증가
         });
-      }, 200);
+      }, 300);
 
       // 메시지 변경 로직
       let messageTimeout: NodeJS.Timeout;
@@ -528,12 +528,12 @@ ${(() => {
                     <div className={styles.timeEstimate}>
                       {loadingStartTime && (
                         <span>
-                          예상 소요 시간: 최대 20초 ⏰
+                          예상 소요 시간: 최대 30초 ⏰
                           {(() => {
                             const elapsed = Math.floor(
                               (Date.now() - loadingStartTime) / 1000
                             );
-                            const remaining = Math.max(0, 20 - elapsed);
+                            const remaining = Math.max(0, 30 - elapsed);
                             return remaining > 0
                               ? ` (약 ${remaining}초 남음)`
                               : " (곧 완료됩니다!)";
