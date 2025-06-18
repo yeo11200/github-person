@@ -1,0 +1,187 @@
+.chartWrapper {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}
+
+.chartStats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .statItem {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    @media (max-width: 480px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+
+    .statValue {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e293b;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+
+      @media (max-width: 768px) {
+        font-size: 1.75rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.5rem;
+      }
+    }
+
+    .statLabel {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      @media (max-width: 768px) {
+        font-size: 0.8rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+.chartContainer {
+  position: relative;
+  height: 400px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    height: 350px;
+  }
+
+  @media (max-width: 480px) {
+    height: 300px;
+  }
+
+  // Chart.js 캔버스 스타일링
+  canvas {
+    border-radius: 8px;
+  }
+}
+
+// 반응형 처리를 위한 추가 스타일
+@media (max-width: 360px) {
+  .chartWrapper {
+    padding: 0.75rem;
+  }
+
+  .chartStats {
+    padding: 0.75rem;
+
+    .statItem {
+      .statValue {
+        font-size: 1.25rem;
+      }
+
+      .statLabel {
+        font-size: 0.7rem;
+      }
+    }
+  }
+
+  .chartContainer {
+    height: 250px;
+  }
+}
+
+// 컴팩트 차트 스타일
+.compactChart {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.compactChartContainer {
+  width: 160px;
+  height: 80px;
+
+  @media (max-width: 1024px) {
+    width: 150px;
+    height: 60px;
+  }
+
+  @media (max-width: 768px) {
+    width: 120px;
+    height: 50px;
+  }
+}
+
+.compactStats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    align-items: flex-end;
+  }
+}
+
+.compactValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.compactLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 2px;
+}

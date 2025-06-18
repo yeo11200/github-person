@@ -4,6 +4,7 @@ import { useRepository } from "../../contexts/RepositoryContext";
 import styles from "./Dashboard.module.scss";
 import { useMyAgent } from "../../store/useMyAgent";
 import dayjs from "dayjs";
+import MonthlyCommitChart from "../../components/MonthlyCommitChart/MonthlyCommitChart";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -45,7 +46,7 @@ const Dashboard = () => {
   return (
     <div className={styles.dashboard}>
       <div className={styles.container}>
-        {/* 사용자 프로필 헤더 */}
+        {/* 사용자 프로필 헤더 - 간소화 */}
         <header className={styles.profileHeader}>
           <div className={styles.userInfo}>
             <div className={styles.avatar}>
@@ -63,9 +64,11 @@ const Dashboard = () => {
               <p className={styles.joinDate}>{userStats.joinDate} 가입</p>
             </div>
           </div>
-          {/* <div className={styles.headerActions}>
-            <button className={styles.editProfileBtn}>프로필 편집</button>
-          </div> */}
+
+          {/* 헤더에 작은 차트 추가 */}
+          <div className={styles.headerChart}>
+            <MonthlyCommitChart isCompact={true} />
+          </div>
         </header>
 
         {/* 통계 섹션 */}

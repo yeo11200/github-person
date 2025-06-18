@@ -5,3 +5,4 @@ export interface APIResponse<T> {
 }
 export * from "./github-repo"; // 또는 "githubRepo"
 export * from "./github-my";
+export * from "./github-commit";

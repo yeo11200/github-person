@@ -13,6 +13,7 @@ import type {
   Repository,
 } from "../types/apis/github-repo";
 import { useMyAgent } from "../store/useMyAgent";
+import { useCommitStats } from "../store/useCommitStats";
 
 interface RepositoryContextType {
   repositories: Repository[];
@@ -36,6 +37,7 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
 }) => {
   const { isAuthenticated } = useAuth();
   const fetchMyData = useMyAgent((state) => state.fetchMyData);
+  const fetctCommitStats = useCommitStats((state) => state.fetctCommitStats);
 
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,7 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
     }
 
     fetchMyData();
+    fetctCommitStats();
 
     try {
       setLoading(true);
