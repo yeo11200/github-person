@@ -8,7 +8,7 @@ export interface CommitData {
  * @param data 커밋 데이터 객체
  * @returns 최고 커밋 수
  */
-export const getMaxCommits = (data: CommitData): number => {
+export const getMaxCount = (data: CommitData): number => {
   const values = Object.values(data);
 
   if (values.length === 0) {
@@ -16,6 +16,26 @@ export const getMaxCommits = (data: CommitData): number => {
   }
 
   return Math.max(...values);
+};
+
+/**
+ * 커밋 데이터에서 최고값을 가진 키(월)를 구하는 함수
+ * @param data 커밋 데이터 객체
+ * @returns 최고 커밋 수를 가진 월 (YYYY-MM 형식) 또는 null
+ */
+export const getMaxCountKey = (data: CommitData): string | null => {
+  const entries = Object.entries(data);
+
+  if (entries.length === 0) {
+    return null;
+  }
+
+  // 최대값을 가진 엔트리 찾기
+  const maxEntry = entries.reduce((max, current) => {
+    return current[1] > max[1] ? current : max;
+  });
+
+  return maxEntry[0];
 };
 
 /**
@@ -56,18 +76,4 @@ export const getCurrentMonthCommits = (data: CommitData): number => {
   ).padStart(2, "0")}`;
 
   return data[currentMonth] || 0;
-};
-
-/**
- * 모든 통계를 한번에 계산하는 함수
- * @param data 커밋 데이터 객체
- * @returns 통계 객체
- */
-export const calculateCommitStats = (data: CommitData) => {
-  return {
-    total: getTotalCommits(data),
-    average: getAverageCommits(data),
-    max: getMaxCommits(data),
-    thisMonth: getCurrentMonthCommits(data),
-  };
 };

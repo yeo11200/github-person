@@ -5,12 +5,14 @@ import styles from "./Dashboard.module.scss";
 import { useMyAgent } from "../../store/useMyAgent";
 import dayjs from "dayjs";
 import MonthlyCommitChart from "../../components/MonthlyCommitChart/MonthlyCommitChart";
+import { selectLanguage, useCommitStats } from "../../store/useCommitStats";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { repoCount } = useRepository();
   const navigate = useNavigate();
   const myData = useMyAgent((state) => state.myData);
+  const language = useCommitStats(selectLanguage);
 
   // 임시 사용자 통계 데이터
   const userStats = {
@@ -18,7 +20,7 @@ const Dashboard = () => {
     summarizedRepos: myData.removeDuplicatesSummary,
     totalSummaries: myData.count,
     thisMonthSummaries: myData.monthCount,
-    // favoriteLanguage: "TypeScript",
+    favoriteLanguage: language,
     joinDate: dayjs(myData.create_at).format("YYYY-MM-DD"),
   };
 
@@ -115,7 +117,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* {userStats?.favoriteLanguage && (
+            {userStats?.favoriteLanguage && (
               <div className={styles.statCard}>
                 <div className={styles.statCardIcon}>💻</div>
                 <div className={styles.statCardContent}>
@@ -125,7 +127,7 @@ const Dashboard = () => {
                   <p className={styles.statCardLabel}>주요 언어</p>
                 </div>
               </div>
-            )} */}
+            )}
           </div>
         </section>
 

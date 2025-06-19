@@ -15,12 +15,10 @@ import { Line } from "react-chartjs-2";
 import styles from "./MonthlyCommitChart.module.scss";
 import CommitStatsPopup from "../CommitStatsPopup";
 import {
-  getAverageCommits,
-  getCurrentMonthCommits,
-  getMaxCommits,
-  getTotalCommits,
-} from "../../utils";
-import { useCommitStats } from "../../store/useCommitStats";
+  selectMonthlyData,
+  selectStats,
+  useCommitStats,
+} from "../../store/useCommitStats";
 
 // Chart.js 구성 요소 등록
 ChartJS.register(
@@ -44,19 +42,8 @@ const MonthlyCommitChart: React.FC<MonthlyCommitChartProps> = ({
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const fetctCommitStats = useCommitStats((state) => state.fetctCommitStats);
   const commitStats = useCommitStats((state) => state.commitStats);
-
-  // monthlyStats를 배열 형태로 변환
-  const monthlyData = useMemo(() => {
-    if (!commitStats?.monthlyStats) return [];
-
-    return Object.entries(commitStats.monthlyStats)
-      .map(([month, commits]) => ({ month, commits }))
-      .sort(
-        (a, b) =>
-          new Date(a.month + "-01").getTime() -
-          new Date(b.month + "-01").getTime()
-      );
-  }, [commitStats]);
+  const monthlyData = useCommitStats(selectMonthlyData);
+  const stats = useCommitStats(selectStats);
 
   // 라인 차트 데이터 (헤더용)
   const lineChartData = useMemo(() => {
@@ -192,24 +179,12 @@ const MonthlyCommitChart: React.FC<MonthlyCommitChartProps> = ({
     []
   );
 
-  // 통계 계산
-  const stats = useMemo(() => {
-    if (!commitStats?.monthlyStats) {
-      return { total: 0, average: 0, max: 0, thisMonth: 0 };
-    }
-
-    const monthlyStats = commitStats.monthlyStats;
-    return {
-      total: getTotalCommits(monthlyStats),
-      average: getAverageCommits(monthlyStats),
-      max: getMaxCommits(monthlyStats),
-      thisMonth: getCurrentMonthCommits(monthlyStats),
-    };
-  }, [commitStats]);
-
   useEffect(() => {
-    fetctCommitStats();
-  }, [fetctCommitStats]);
+    // 데이터가 없을 때만 API 호출
+    if (!commitStats) {
+      fetctCommitStats();
+    }
+  }, [commitStats, fetctCommitStats]); // 빈 의존성 배열로 마운트 시에만 실행
 
   // 헤더용 작은 차트
   if (isCompact) {

@@ -38,6 +38,7 @@ const RepoSummary = () => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
+  const [remainingTime, setRemainingTime] = useState<number>(30);
 
   // 상수를 컴포넌트 외부로 이동하여 안정적인 참조 생성
   const TABS_CONFIG = [
@@ -50,6 +51,7 @@ const RepoSummary = () => {
       setLoadingProgress(0);
       setCurrentMessageIndex(0);
       setLoadingStartTime(Date.now());
+      setRemainingTime(30); // 30초로 초기화
 
       const progressInterval = setInterval(() => {
         setLoadingProgress((prev) => {
@@ -82,8 +84,26 @@ const RepoSummary = () => {
       setLoadingProgress(0);
       setCurrentMessageIndex(0);
       setLoadingStartTime(null);
+      setRemainingTime(30); // 초기화
     }
   }, [generatingType]);
+
+  // 실시간 카운트다운 업데이트
+  useEffect(() => {
+    let timeInterval: NodeJS.Timeout;
+
+    if (generatingType && loadingStartTime) {
+      timeInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - loadingStartTime) / 1000);
+        const remaining = Math.max(0, 30 - elapsed);
+        setRemainingTime(remaining);
+      }, 1000); // 1초마다 업데이트
+    }
+
+    return () => {
+      if (timeInterval) clearInterval(timeInterval);
+    };
+  }, [generatingType, loadingStartTime]);
 
   // fetchRepositoryAndBranches를 useCallback으로 메모이제이션
   const fetchRepositoryAndBranches = useCallback(async () => {
@@ -529,15 +549,9 @@ ${(() => {
                       {loadingStartTime && (
                         <span>
                           예상 소요 시간: 최대 30초 ⏰
-                          {(() => {
-                            const elapsed = Math.floor(
-                              (Date.now() - loadingStartTime) / 1000
-                            );
-                            const remaining = Math.max(0, 30 - elapsed);
-                            return remaining > 0
-                              ? ` (약 ${remaining}초 남음)`
-                              : " (곧 완료됩니다!)";
-                          })()}
+                          {remainingTime > 0
+                            ? ` (약 ${remainingTime}초 남음)`
+                            : " (곧 완료됩니다!)"}
                         </span>
                       )}
                     </div>
