@@ -120,13 +120,6 @@ const Header = () => {
                   >
                     레포지토리
                   </Link>
-                  <Link
-                    to="/profile"
-                    className={styles.mobileNavLink}
-                    onClick={closeMobileMenu}
-                  >
-                    프로필
-                  </Link>
                   <button
                     onClick={() => {
                       logout();
