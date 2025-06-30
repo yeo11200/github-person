@@ -1,18 +1,68 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth, type User } from "../../contexts/AuthContext";
 import { useRepository } from "../../contexts/RepositoryContext";
 import styles from "./Dashboard.module.scss";
 import { useMyAgent } from "../../store/useMyAgent";
 import dayjs from "dayjs";
 import MonthlyCommitChart from "../../components/MonthlyCommitChart/MonthlyCommitChart";
 import { selectLanguage, useCommitStats } from "../../store/useCommitStats";
+import { useState, useRef } from "react";
+import fetchApi from "../../utils/fetch-api";
+import type { APIResponse, RepositoryMyUploadImage } from "../../types/apis";
+import Modal from "../../components/Modal/Modal";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { repoCount } = useRepository();
   const navigate = useNavigate();
   const myData = useMyAgent((state) => state.myData);
   const language = useCommitStats(selectLanguage);
+
+  // 프로필 이미지 업로드 관련 상태
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 모달 상태 관리
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    type: "alert" | "confirm";
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    type: "alert",
+    title: "",
+    message: "",
+  });
+
+  const showAlert = (title: string, message: string) => {
+    setModal({
+      isOpen: true,
+      type: "alert",
+      title,
+      message,
+    });
+  };
+
+  const showConfirm = (
+    title: string,
+    message: string,
+    onConfirm: () => void
+  ) => {
+    setModal({
+      isOpen: true,
+      type: "confirm",
+      title,
+      message,
+      onConfirm,
+    });
+  };
+
+  const closeModal = () => {
+    setModal((prev) => ({ ...prev, isOpen: false }));
+  };
 
   // 임시 사용자 통계 데이터
   const userStats = {
@@ -25,6 +75,113 @@ const Dashboard = () => {
   };
 
   const recentActivity = myData.repositorySummary;
+
+  // 프로필 이미지 업로드 함수
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      uploadProfileImage(files[0]);
+    }
+  };
+
+  const uploadProfileImage = async (file: File) => {
+    // 이미지 파일 검증
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+      showAlert(
+        "업로드 실패",
+        "이미지 파일만 업로드 가능합니다.\n(JPG, PNG, GIF, WebP, 최대 5MB)"
+      );
+      // 파일 입력 초기화
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const result = await fetchApi<APIResponse<RepositoryMyUploadImage>>(
+        "/github/my/profile-image",
+        {
+          method: "POST",
+          body: formData,
+          includeAuth: true,
+        }
+      );
+
+      if (result.status === "success") {
+        console.log(
+          `프로필 이미지 업로드 완료: ${result.data.user.profile_image_url}`
+        );
+        showAlert(
+          "업로드 완료",
+          "프로필 이미지가 성공적으로 업데이트되었습니다!"
+        );
+
+        const updateUserInfo = {
+          ...user,
+          avatar_url: result.data.user.profile_image_url,
+        } as User;
+
+        localStorage.setItem("github_user", JSON.stringify(updateUserInfo));
+        setUser(updateUserInfo);
+      } else {
+        throw new Error(result.message || "프로필 이미지 업로드 실패");
+      }
+    } catch (error) {
+      console.error("프로필 이미지 업로드 실패:", error);
+      showAlert("업로드 실패", "프로필 이미지 업로드 중 오류가 발생했습니다.");
+    } finally {
+      setIsUploading(false);
+      // 파일 입력 초기화 (성공/실패 관계없이)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const deleteProfileImage = async () => {
+    showConfirm(
+      "프로필 이미지 삭제",
+      "프로필 이미지를 삭제하시겠습니까?",
+      async () => {
+        setIsDeleting(true);
+
+        try {
+          const result = await fetchApi<APIResponse<RepositoryMyUploadImage>>(
+            "/github/my/profile-image",
+            {
+              method: "DELETE",
+              includeAuth: true,
+            }
+          );
+
+          if (result.status === "success") {
+            showAlert("삭제 완료", "프로필 이미지가 삭제되었습니다.");
+            const updateUserInfo = {
+              ...user,
+              avatar_url: result.data.user?.avatar_url || "",
+            } as User;
+
+            localStorage.setItem("github_user", JSON.stringify(updateUserInfo));
+            setUser(updateUserInfo);
+          } else {
+            throw new Error(result.message || "프로필 이미지 삭제 실패");
+          }
+        } catch (error) {
+          console.error("프로필 이미지 삭제 실패:", error);
+          showAlert("삭제 실패", "프로필 이미지 삭제 중 오류가 발생했습니다.");
+        } finally {
+          setIsDeleting(false);
+        }
+      }
+    );
+  };
 
   const handleGoToRepoSummary = (owner: string, repoId: string) => {
     navigate(`/repositories/${owner}/${repoId}/summary`);
@@ -64,6 +221,38 @@ const Dashboard = () => {
                 {user?.username || "이메일 없음"}
               </p>
               <p className={styles.joinDate}>{userStats.joinDate} 가입</p>
+
+              {/* 프로필 이미지 관리 버튼들 */}
+              <div className={styles.profileActions}>
+                <button
+                  className={styles.profileActionBtn}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading || isDeleting}
+                  title="프로필 이미지 변경"
+                >
+                  {isUploading ? "업로드중" : "이미지 변경"}
+                </button>
+
+                {user?.avatar_url && (
+                  <button
+                    className={`${styles.profileActionBtn} ${styles.deleteBtn}`}
+                    onClick={deleteProfileImage}
+                    disabled={isUploading || isDeleting}
+                    title="프로필 이미지 삭제"
+                  >
+                    {isDeleting ? "삭제중" : "이미지 삭제"}
+                  </button>
+                )}
+
+                {/* 숨겨진 파일 입력 */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={handleFileInputChange}
+                  style={{ display: "none" }}
+                />
+              </div>
             </div>
           </div>
 
@@ -169,21 +358,6 @@ const Dashboard = () => {
               <span className={styles.quickActionBtnIcon}>➕</span>
               <span className={styles.quickActionBtnText}>새 요약 만들기</span>
             </button>
-
-            {/* <button className={styles.quickActionBtn}>
-              <span className={styles.quickActionBtnIcon}>📁</span>
-              <span className={styles.quickActionBtnText}>레포지토리 관리</span>
-            </button>
-
-            <button className={styles.quickActionBtn}>
-              <span className={styles.quickActionBtnIcon}>⚙️</span>
-              <span className={styles.quickActionBtnText}>설정</span>
-            </button>
-
-            <button className={styles.quickActionBtn}>
-              <span className={styles.quickActionBtnIcon}>📊</span>
-              <span className={styles.quickActionBtnText}>통계 보기</span>
-            </button> */}
           </div>
         </section>
 
@@ -234,6 +408,16 @@ const Dashboard = () => {
           </div>
         </section> */}
       </div>
+
+      {/* 커스텀 모달 */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   );
 };

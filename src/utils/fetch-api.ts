@@ -22,9 +22,12 @@ const fetchApi = async <T>(
     } = options;
 
     // 기본 헤더 설정
-    const defaultHeaders: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
+    const defaultHeaders: Record<string, string> = {};
+
+    // FormData가 아닌 경우에만 Content-Type 설정
+    if (!(body instanceof FormData)) {
+      defaultHeaders["Content-Type"] = "application/json";
+    }
 
     // Authorization 헤더 추가 (토큰이 있고 includeAuth가 true인 경우)
     if (includeAuth) {
@@ -60,7 +63,12 @@ const fetchApi = async <T>(
     const response = await fetch(fullUrl, {
       method,
       headers: finalHeaders,
-      body: body ? JSON.stringify(body) : undefined,
+      body:
+        body instanceof FormData
+          ? body
+          : body
+          ? JSON.stringify(body)
+          : undefined,
     });
 
     if (!response.ok) {

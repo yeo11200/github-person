@@ -188,6 +188,7 @@
       .joinDate {
         color: #888;
         font-size: 0.9rem;
+        margin-bottom: 0.5rem;
 
         @media (max-width: 1024px) {
           font-size: 0.85rem;
@@ -195,6 +196,53 @@
 
         @media (max-width: 480px) {
           font-size: 0.8rem;
+        }
+      }
+
+      .profileActions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+
+        .profileActionBtn {
+          border-radius: 6px;
+          border: none;
+          background: #667eea;
+          color: white;
+          font-size: 0.75rem;
+          font-weight: 500;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          padding: 0.4rem 0.8rem;
+          white-space: nowrap;
+
+          &:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+          }
+
+          &:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+          }
+
+          &.deleteBtn {
+            background: #e53e3e;
+
+            &:hover {
+              background: #c53030;
+            }
+          }
+
+          @media (max-width: 480px) {
+            font-size: 0.7rem;
+            padding: 0.35rem 0.7rem;
+          }
         }
       }
     }
@@ -833,6 +881,12 @@
       @media (max-width: 768px) {
         transform: translateY(-1px);
       }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .quickActionBtnIcon {

@@ -23,6 +23,7 @@ interface AuthContextType {
   loginWithGitHub: () => Promise<void>;
   handleGitHubCallback: (code: string) => Promise<void>;
   logout: () => void;
+  setUser: (user: User | null) => void;
   isAuthenticated: boolean;
 }
 
@@ -166,6 +167,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loginWithGitHub,
     handleGitHubCallback,
     logout,
+    setUser,
     isAuthenticated: !!user,
   };
 

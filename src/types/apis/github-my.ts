@@ -14,3 +14,17 @@ export interface RepositorySummaryData {
   removeDuplicatesSummary: number; // 중복 제거된 수
   create_at: string;
 }
+
+export interface RepositoryMyUploadImage {
+  user: {
+    id: string;
+    username: string;
+    profile_image_url: string;
+    avatar_url?: string;
+  };
+  image: {
+    url: string;
+    key: string;
+    uploadedAt: string;
+  };
+}
