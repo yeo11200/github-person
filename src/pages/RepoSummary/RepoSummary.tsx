@@ -297,8 +297,8 @@ ${(() => {
 
 ## 📅 프로젝트 기간
 ${(() => {
-  const createdDate = new Date(repo.created_at);
-  const updatedDate = new Date(repo.updated_at);
+  const createdDate = new Date(data.created_at);
+  const updatedDate = new Date(data.updated_at);
 
   // 날짜 유효성 검사
   const isValidCreated = !isNaN(createdDate.getTime());
