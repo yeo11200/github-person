@@ -41,9 +41,9 @@ const RepoSummary = () => {
   const [remainingTime, setRemainingTime] = useState<number>(30);
 
   // 상수를 컴포넌트 외부로 이동하여 안정적인 참조 생성
-  const TABS_CONFIG = [
-    { id: "resume" as SummaryType, label: "이력서용", icon: "📄" },
-  ];
+  const TABS_CONFIG = useMemo(() => {
+    return [{ id: "resume" as SummaryType, label: "이력서용", icon: "📄" }];
+  }, []);
 
   // 로딩 애니메이션 효과
   useEffect(() => {
@@ -364,9 +364,6 @@ ${(() => {
     setSelectedBranch(branchName);
   }, []);
 
-  // tabs를 useMemo로 메모이제이션하되, 상수 참조 사용
-  const tabs = useMemo(() => TABS_CONFIG, []);
-
   useEffect(() => {
     if (selectedBranch && owner && repoId) {
       summaryGetData();
@@ -385,6 +382,11 @@ ${(() => {
         return "";
     }
   }, [summaryContent, repository, activeTab, generateResumeSummary]);
+
+  const goToGithubRepo = useCallback(() => {
+    if (!repository) return;
+    window.open(`${repository.html_url}/tree/${selectedBranch}`, "_blank");
+  }, [repository, selectedBranch]);
 
   if (loading) {
     return (
@@ -419,7 +421,9 @@ ${(() => {
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.repoInfo}>
-            <h1 className={styles.repoName}>{repository.name}</h1>
+            <h1 className={styles.repoName} onClick={goToGithubRepo}>
+              {repository.name}
+            </h1>
             <p className={styles.repoDescription}>
               {repository.description || "설명이 없습니다."}
             </p>
@@ -455,7 +459,7 @@ ${(() => {
         </header>
 
         <div className={styles.tabs}>
-          {tabs.map((tab) => (
+          {TABS_CONFIG.map((tab) => (
             <button
               key={tab.id}
               className={`${styles.tab} ${
@@ -472,7 +476,7 @@ ${(() => {
         <div className={styles.content}>
           <div className={styles.contentHeader}>
             <h2 className={styles.contentTitle}>
-              {tabs.find((tab) => tab.id === activeTab)?.label} 요약
+              {TABS_CONFIG.find((tab) => tab.id === activeTab)?.label} 요약
               <span className={styles.branchBadge}>({selectedBranch})</span>
             </h2>
             <div className={styles.contentActions}>
