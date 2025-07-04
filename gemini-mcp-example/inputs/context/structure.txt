@@ -1,0 +1,174 @@
+=== 프로젝트 전체 구조 ===
+.
+├── README.md
+├── eslint.config.js
+├── gemini-mcp-example
+│   ├── README.md
+│   ├── config
+│   │   └── mcp.config.json
+│   ├── inputs
+│   │   ├── code
+│   │   │   └── Header.tsx
+│   │   └── context
+│   │       └── structure.txt
+│   ├── outputs
+│   │   ├── advice
+│   │   │   └── structure.advice.md
+│   │   ├── backups
+│   │   ├── migration
+│   │   ├── performance
+│   │   │   ├── Button.performance.md
+│   │   │   ├── CommitStatsPopup.performance.md
+│   │   │   ├── Header.performance.md
+│   │   │   ├── Layout.performance.md
+│   │   │   └── Modal.performance.md
+│   │   ├── refactored
+│   │   │   ├── Header_refactored_structure.md
+│   │   │   ├── local-storage_utils_refactored.md
+│   │   │   ├── local-storage_zustand_refactored.md
+│   │   │   └── src
+│   │   ├── structure
+│   │   │   └── analysis.md
+│   │   └── tests
+│   ├── prompts
+│   │   ├── folder_analysis.yaml
+│   │   ├── migration.yaml
+│   │   ├── performance.yaml
+│   │   ├── refactor-apis.yaml
+│   │   ├── refactor-store-rtk.yaml
+│   │   ├── refactor-store-zustand.yaml
+│   │   ├── refactor-store.yaml
+│   │   ├── refactor-utils.yaml
+│   │   ├── refactor.yaml
+│   │   ├── testgen-component.yaml
+│   │   ├── testgen-logic.yaml
+│   │   └── testgen.yaml
+│   └── temp
+│       ├── refactor_output.md
+│       └── refactor_prompt.txt
+├── index.html
+├── mcp-auto-run.sh
+├── package.json
+├── pnpm-lock.yaml
+├── public
+│   └── vite.svg
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── assets
+│   │   ├── favicon.png
+│   │   ├── logo.png
+│   │   └── react.svg
+│   ├── components
+│   │   ├── CommitStatsPopup
+│   │   │   ├── CommitStatsPopup.module.scss
+│   │   │   ├── CommitStatsPopup.tsx
+│   │   │   └── index.ts
+│   │   ├── Header
+│   │   │   ├── Header.module.scss
+│   │   │   ├── Header.tsx
+│   │   │   └── index.ts
+│   │   ├── Layout
+│   │   │   ├── Layout.module.scss
+│   │   │   ├── Layout.tsx
+│   │   │   └── index.ts
+│   │   ├── Modal
+│   │   │   ├── Modal.module.scss
+│   │   │   └── Modal.tsx
+│   │   └── MonthlyCommitChart
+│   │       ├── MonthlyCommitChart.module.scss
+│   │       ├── MonthlyCommitChart.tsx
+│   │       └── index.ts
+│   ├── contexts
+│   │   ├── AuthContext.tsx
+│   │   └── RepositoryContext.tsx
+│   ├── index.css
+│   ├── main.tsx
+│   ├── pages
+│   │   ├── Callback
+│   │   │   ├── Callback.module.scss
+│   │   │   ├── Callback.tsx
+│   │   │   └── index.ts
+│   │   ├── Dashboard
+│   │   │   ├── Dashboard.module.scss
+│   │   │   ├── Dashboard.tsx
+│   │   │   └── index.ts
+│   │   ├── Home
+│   │   │   ├── Home.module.scss
+│   │   │   ├── Home.tsx
+│   │   │   └── index.ts
+│   │   ├── NotFound.tsx
+│   │   ├── RepoSelect
+│   │   │   ├── RepoSelect.module.scss
+│   │   │   ├── RepoSelect.tsx
+│   │   │   └── index.ts
+│   │   └── RepoSummary
+│   │       ├── RepoSummary.module.scss
+│   │       ├── RepoSummary.tsx
+│   │       └── index.ts
+│   ├── router
+│   │   └── index.tsx
+│   ├── store
+│   │   ├── useCommitStats.tsx
+│   │   └── useMyAgent.tsx
+│   ├── styles
+│   │   ├── NotFound.scss
+│   │   └── Profile.scss
+│   ├── types
+│   │   └── apis
+│   │       ├── github-commit.ts
+│   │       ├── github-my.ts
+│   │       ├── github-repo.ts
+│   │       └── index.ts
+│   ├── utils
+│   │   ├── fetch-api.ts
+│   │   ├── index.ts
+│   │   └── local-storage.ts
+│   └── vite-env.d.ts
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vercel.json
+└── vite.config.ts
+
+39 directories, 92 files
+
+=== React 파일 목록 ===
+./gemini-mcp-example/outputs/refactored/src/components/Modal/Modal.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/hooks/useHeader.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/Header.tsx
+./gemini-mcp-example/outputs/refactored/src/store/useMyAgent.tsx
+./src/App.tsx
+./src/main.tsx
+./src/contexts/RepositoryContext.tsx
+./src/contexts/AuthContext.tsx
+./src/components/MonthlyCommitChart/MonthlyCommitChart.tsx
+./src/components/CommitStatsPopup/CommitStatsPopup.tsx
+./src/components/Layout/Layout.tsx
+./src/components/Modal/Modal.tsx
+./src/components/Header/Header.tsx
+./src/pages/Home/Home.tsx
+./src/pages/RepoSelect/RepoSelect.tsx
+./src/pages/Dashboard/Dashboard.tsx
+./src/pages/RepoSummary/RepoSummary.tsx
+./src/pages/Callback/Callback.tsx
+./src/pages/NotFound.tsx
+./src/store/useMyAgent.tsx
+
+=== 패키지 정보 ===
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.0",
+    "dayjs": "^1.11.13",
+    "proxy-memoize": "^3.0.1",
+    "react": "^19.1.0",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.6.1",
+    "zustand": "^5.0.5"

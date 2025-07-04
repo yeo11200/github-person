@@ -1,0 +1,94 @@
+id: refactor-utils
+model: gemini-pro
+temperature: 0.1
+input_vars: ["code", "structure"]
+prompt: |
+  시니어 백엔드/프론트엔드 아키텍트로서 다음 유틸리티 코드를 성능과 유지보수성에 중점을 두고 리팩토링하세요.
+
+  원본 코드:
+  ```typescript
+  {{code}}
+  ```
+
+  ## 🛠️ Utils 리팩토링 핵심 원칙:
+
+  ### 1. 순수 함수 설계:
+  - ✅ 사이드 이펙트 없는 순수 함수로 설계
+  - ✅ 동일한 입력에 항상 동일한 출력 보장
+  - ✅ 예측 가능하고 테스트하기 쉬운 구조
+  - ✅ 불변성(Immutability) 원칙 준수
+
+  ### 2. 타입 안전성 강화:
+  - ✅ 제네릭을 활용한 재사용 가능한 타입
+  - ✅ 엄격한 타입 가드 함수 구현
+  - ✅ 런타임 타입 검증 추가
+  - ✅ 에러 타입 명시적 정의
+
+  ### 3. 성능 최적화:
+  - ✅ 메모이제이션 패턴 적용 (필요시)
+  - ✅ 지연 평가(Lazy Evaluation) 구현
+  - ✅ 효율적인 알고리즘 사용
+  - ✅ 불필요한 객체 생성 방지
+
+  ### 4. 에러 처리 강화:
+  - ✅ Result 타입 패턴 사용 (성공/실패 명시)
+  - ✅ 구체적이고 유용한 에러 메시지
+  - ✅ 에러 복구 전략 제공
+  - ✅ 타입 안전한 에러 핸들링
+
+  ### 5. 함수 조합성:
+  - ✅ 작은 단위의 함수로 분해
+  - ✅ 고차 함수 활용
+  - ✅ 파이프라인 패턴 구현
+  - ✅ 커링(Currying) 적용 가능한 함수
+
+  ## 🔧 구체적인 개선 패턴:
+
+  ```typescript
+  // ✅ Result 타입 패턴
+  type Result<T, E = Error> = 
+    | { success: true; data: T }
+    | { success: false; error: E };
+
+  // ✅ 타입 가드 함수
+  const isValidEmail = (email: string): email is string => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  // ✅ 제네릭 활용
+  const createMemoized = <T extends (...args: any[]) => any>(fn: T): T => {
+    const cache = new Map();
+    return ((...args: Parameters<T>) => {
+      const key = JSON.stringify(args);
+      if (cache.has(key)) return cache.get(key);
+      const result = fn(...args);
+      cache.set(key, result);
+      return result;
+    }) as T;
+  };
+
+  // ✅ 함수 조합
+  const pipe = <T>(...fns: Array<(arg: T) => T>) => (value: T): T =>
+    fns.reduce((acc, fn) => fn(acc), value);
+  ```
+
+  ## 📋 출력 형식:
+
+  ---
+  ## 📄 파일: `개선된_파일명.ts`
+  ```typescript
+  [리팩토링된 유틸리티 코드]
+  [순수 함수, 타입 안전성, 성능 최적화 적용]
+  [JSDoc 문서화 포함]
+  ```
+
+  ---
+
+  **중요 규칙:**
+  - 설명 없이 실행 가능한 코드만 출력
+  - 모든 함수에 JSDoc 문서화 추가
+  - 타입 안전성을 최우선으로 고려
+  - 테스트하기 쉬운 구조로 설계
+  - 성능과 메모리 효율성 고려
+
+  지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:

@@ -1,0 +1,268 @@
+id: refactor-store-zustand
+model: gemini-pro
+temperature: 0.1
+input_vars: ["code", "structure"]
+prompt: |
+  시니어 프론트엔드 아키텍트로서 다음 Zustand 상태 관리 코드를 성능, 예측 가능성, 확장성에 중점을 두고 리팩토링하세요.
+
+  원본 코드:
+  ```typescript
+  {{code}}
+  ```
+
+  ## 🐻 Zustand 5.0+ 리팩토링 핵심 원칙:
+
+  ### 1. Store 구조 최적화:
+  - ✅ 슬라이스 패턴으로 관심사 분리
+  - ✅ 타입 안전한 상태 정의
+  - ✅ 액션과 상태 명확히 분리
+  - ✅ 미들웨어 활용한 기능 확장
+
+  ### 2. 성능 최적화 (Zustand 5.0+):
+  - ✅ useShallow 훅으로 선택적 구독
+  - ✅ 불필요한 리렌더링 방지
+  - ✅ 계산된 값 메모이제이션
+  - ✅ 액션 함수 안정화
+
+  ### 3. 비동기 처리 패턴:
+  - ✅ 로딩/에러/성공 상태 표준화
+  - ✅ 낙관적 업데이트 구현
+  - ✅ 요청 취소 및 정리
+  - ✅ 재시도 로직 내장
+
+  ### 4. 타입 안전성:
+  - ✅ 엄격한 TypeScript 타입 정의
+  - ✅ 액션 함수 타입 안전성
+  - ✅ 셀렉터 타입 추론
+  - ✅ 미들웨어 타입 지원
+
+  ## 🔧 Zustand 5.0+ 개선 패턴:
+
+  ```typescript
+  import { create, StateCreator } from 'zustand';
+  import { devtools, persist, createJSONStorage } from 'zustand/middleware';
+  import { immer } from 'zustand/middleware/immer';
+  import { useShallow } from 'zustand/react/shallow';
+
+  // ✅ 타입 안전한 상태 정의
+  interface UserState {
+    users: User[];
+    currentUser: User | null;
+    loading: boolean;
+    error: string | null;
+  }
+
+  interface UserActions {
+    fetchUsers: () => Promise<void>;
+    setCurrentUser: (user: User) => void;
+    updateUser: (id: string, updates: Partial<User>) => void;
+    clearError: () => void;
+    reset: () => void;
+  }
+
+  type UserStore = UserState & UserActions;
+
+  // ✅ 초기 상태 분리
+  const userInitialState: UserState = {
+    users: [],
+    currentUser: null,
+    loading: false,
+    error: null,
+  };
+
+  // ✅ 슬라이스 패턴 구현 (Zustand 5.0+)
+  const createUserSlice: StateCreator<
+    UserStore,
+    [['zustand/devtools', never], ['zustand/persist', unknown], ['zustand/immer', never]],
+    [],
+    UserStore
+  > = (set) => ({
+    ...userInitialState,
+
+    // Actions
+    fetchUsers: async () => {
+      set((state) => {
+        state.loading = true;
+        state.error = null;
+      }, false, 'fetchUsers/pending');
+
+      try {
+        const users = await api.getUsers();
+        set((state) => {
+          state.users = users;
+          state.loading = false;
+        }, false, 'fetchUsers/fulfilled');
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+        set((state) => {
+          state.error = errorMessage;
+          state.loading = false;
+        }, false, 'fetchUsers/rejected');
+      }
+    },
+
+    setCurrentUser: (user) => set((state) => {
+      state.currentUser = user;
+    }, false, 'setCurrentUser'),
+
+    updateUser: (id, updates) => set((state) => {
+      state.users = state.users.map(user => 
+        user.id === id ? { ...user, ...updates } : user
+      );
+      if (state.currentUser?.id === id) {
+        state.currentUser = { ...state.currentUser, ...updates };
+      }
+    }, false, 'updateUser'),
+
+    clearError: () => set((state) => {
+      state.error = null;
+    }, false, 'clearError'),
+
+    reset: () => set(userInitialState, false, 'reset')
+  });
+
+  // ✅ 미들웨어 활용 (Zustand 5.0+)
+  export const useUserStore = create<UserStore>()(
+    devtools(
+      persist(
+        immer(createUserSlice),
+        {
+          name: 'user-store',
+          storage: createJSONStorage(() => localStorage),
+          partialize: (state) => ({ 
+            currentUser: state.currentUser 
+          })
+        }
+      ),
+      { name: 'UserStore' }
+    )
+  );
+
+  // ✅ 선택적 구독 훅 (Zustand 5.0+ useShallow)
+  export const useUsers = () => useUserStore((state) => state.users);
+  export const useCurrentUser = () => useUserStore((state) => state.currentUser);
+
+  export const useUserStatus = () => useUserStore(
+    useShallow((state) => ({ 
+      loading: state.loading, 
+      error: state.error 
+    }))
+  );
+
+  export const useUserActions = () => useUserStore(
+    useShallow((state) => ({
+      fetchUsers: state.fetchUsers,
+      setCurrentUser: state.setCurrentUser,
+      updateUser: state.updateUser,
+      clearError: state.clearError,
+      reset: state.reset
+    }))
+  );
+
+  // ✅ 계산된 값 셀렉터 (useShallow 사용)
+  export const useUserStats = () => useUserStore(
+    useShallow((state) => ({
+      totalUsers: state.users.length,
+      activeUsers: state.users.filter(u => u.isActive).length,
+      hasCurrentUser: !!state.currentUser
+    }))
+  );
+  ```
+
+  ## 🚀 고급 패턴 (Zustand 5.0+):
+
+  ### 1. 비동기 상태 래퍼:
+  ```typescript
+  interface AsyncState<T> {
+    data: T | null;
+    loading: boolean;
+    error: string | null;
+    lastFetch: number | null;
+  }
+
+  const createAsyncSlice = <T>(
+    name: string,
+    fetcher: () => Promise<T>
+  ) => {
+    const initialState: AsyncState<T> = {
+      data: null,
+      loading: false,
+      error: null,
+      lastFetch: null
+    };
+
+    return {
+      [`${name}State`]: initialState,
+
+      [`fetch${name}`]: async (set: any) => {
+        set((state: any) => {
+          state[`${name}State`].loading = true;
+          state[`${name}State`].error = null;
+        }, false, `fetch${name}/pending`);
+
+        try {
+          const data = await fetcher();
+          set((state: any) => {
+            state[`${name}State`] = { 
+              data, 
+              loading: false, 
+              error: null, 
+              lastFetch: Date.now() 
+            };
+          }, false, `fetch${name}/fulfilled`);
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+          set((state: any) => {
+            state[`${name}State`].loading = false;
+            state[`${name}State`].error = errorMessage;
+          }, false, `fetch${name}/rejected`);
+        }
+      }
+    };
+  };
+  ```
+
+  ### 2. 옵티미스틱 업데이트:
+  ```typescript
+  const optimisticUpdate = async <T>(
+    set: any,
+    optimisticData: Partial<T>,
+    apiCall: () => Promise<T>,
+    rollback: (error: unknown) => void
+  ) => {
+    // 즉시 UI 업데이트
+    set((state: T) => ({ ...state, ...optimisticData }), false, 'optimistic');
+    
+    try {
+      const result = await apiCall();
+      set((state: T) => ({ ...state, ...result }), false, 'confirmed');
+    } catch (error: unknown) {
+      rollback(error);
+      throw error;
+    }
+  };
+  ```
+
+  ## 📋 출력 형식:
+
+  ---
+  ## 📄 파일: `개선된_파일명.ts`
+  ```typescript
+  [리팩토링된 Zustand 상태 관리 코드]
+  [슬라이스 패턴, 타입 안전성, 성능 최적화 적용]
+  [useShallow, 선택적 구독, 비동기 처리 포함]
+  [JSDoc 문서화 포함]
+  ```
+
+  ---
+
+  **중요 규칙 (Zustand 5.0+):**
+  - 설명 없이 실행 가능한 코드만 출력
+  - useShallow 훅을 사용한 선택적 구독 패턴 적용
+  - 모든 액션과 셀렉터에 JSDoc 문서화 추가
+  - 타입 안전성과 성능 최적화 동시 고려
+  - 에러 처리에서 unknown 타입 사용
+  - 테스트하기 쉬운 구조로 설계
+  - 미들웨어 타입 순서 정확히 지정
+
+  지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:

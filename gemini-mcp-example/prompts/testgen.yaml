@@ -1,0 +1,274 @@
+id: testgen
+model: gemini-pro
+temperature: 0.1
+input_vars: ["code", "structure"]
+prompt: |
+  시니어 테스트 엔지니어로서 다음 코드에 대한 포괄적이고 실용적인 테스트 코드를 작성하세요.
+
+  원본 코드:
+  ```typescript
+  {{code}}
+  ```
+
+  ## 🧪 테스트 생성 핵심 원칙:
+
+  ### 1. 테스트 타입 자동 감지:
+  - ✅ React 컴포넌트 (.tsx/.jsx) → 컴포넌트 테스트
+  - ✅ 유틸리티 함수 (.ts/.js) → 단위 테스트
+  - ✅ API 서비스 → 통합 테스트
+  - ✅ 상태 관리 (Store) → 상태 테스트
+  - ✅ 커스텀 훅 → 훅 테스트
+
+  ### 2. React 컴포넌트 테스트:
+  - ✅ 렌더링 테스트 (다양한 props)
+  - ✅ 사용자 상호작용 테스트 (클릭, 입력 등)
+  - ✅ 조건부 렌더링 로직
+  - ✅ 에러 경계 및 에지 케이스
+  - ✅ 성능 테스트 (메모이제이션, 리렌더링)
+  - ✅ 접근성 테스트 (키보드, 스크린 리더)
+
+  ### 3. 유틸리티 함수 테스트:
+  - ✅ 순수 함수 테스트 (입력/출력)
+  - ✅ 에러 처리 테스트
+  - ✅ 엣지 케이스 및 경계값
+  - ✅ 타입 안전성 검증
+  - ✅ 성능 벤치마크
+
+  ### 4. API/서비스 테스트:
+  - ✅ HTTP 요청/응답 모킹
+  - ✅ 에러 처리 시나리오
+  - ✅ 재시도 로직 테스트
+  - ✅ 타임아웃 및 취소 테스트
+
+  ### 5. 상태 관리 테스트:
+  - ✅ 액션 디스패치 테스트
+  - ✅ 상태 변화 검증
+  - ✅ 비동기 액션 테스트
+  - ✅ 셀렉터 테스트
+
+  ## 🔧 테스트 프레임워크 및 도구:
+
+  ```typescript
+  // ✅ 기본 테스트 설정
+  import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+  import { renderHook, act } from '@testing-library/react-hooks';
+  import userEvent from '@testing-library/user-event';
+  import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+
+  // ✅ React 컴포넌트 테스트 예시
+  describe('MyComponent', () => {
+    const defaultProps = {
+      title: 'Test Title',
+      onSubmit: vi.fn(),
+    };
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    describe('렌더링', () => {
+      it('기본 props로 정상 렌더링된다', () => {
+        render(<MyComponent {...defaultProps} />);
+        expect(screen.getByText('Test Title')).toBeInTheDocument();
+      });
+
+      it('loading 상태일 때 스피너를 표시한다', () => {
+        render(<MyComponent {...defaultProps} loading />);
+        expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+      });
+    });
+
+    describe('사용자 상호작용', () => {
+      it('버튼 클릭 시 onSubmit이 호출된다', async () => {
+        const user = userEvent.setup();
+        render(<MyComponent {...defaultProps} />);
+        
+        await user.click(screen.getByRole('button', { name: /submit/i }));
+        expect(defaultProps.onSubmit).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('성능', () => {
+      it('동일한 props로 리렌더링되지 않는다', () => {
+        const { rerender } = render(<MyComponent {...defaultProps} />);
+        const renderCount = vi.fn();
+        
+        // 렌더링 카운트 추적 로직
+        rerender(<MyComponent {...defaultProps} />);
+        expect(renderCount).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('접근성', () => {
+      it('키보드 네비게이션이 작동한다', async () => {
+        const user = userEvent.setup();
+        render(<MyComponent {...defaultProps} />);
+        
+        await user.tab();
+        expect(screen.getByRole('button')).toHaveFocus();
+      });
+
+      it('적절한 ARIA 속성을 가진다', () => {
+        render(<MyComponent {...defaultProps} />);
+        expect(screen.getByRole('button')).toHaveAttribute('aria-label');
+      });
+    });
+  });
+
+  // ✅ 유틸리티 함수 테스트 예시
+  describe('formatDate', () => {
+    it('유효한 날짜를 올바르게 포맷한다', () => {
+      const date = new Date('2023-12-25');
+      expect(formatDate(date)).toBe('2023-12-25');
+    });
+
+    it('잘못된 입력에 대해 에러를 던진다', () => {
+      expect(() => formatDate('invalid')).toThrow('Invalid date');
+    });
+
+    it('null/undefined 입력을 처리한다', () => {
+      expect(formatDate(null)).toBe('');
+      expect(formatDate(undefined)).toBe('');
+    });
+  });
+
+  // ✅ 커스텀 훅 테스트 예시
+  describe('useCounter', () => {
+    it('초기값으로 시작한다', () => {
+      const { result } = renderHook(() => useCounter(5));
+      expect(result.current.count).toBe(5);
+    });
+
+    it('increment 함수가 카운트를 증가시킨다', () => {
+      const { result } = renderHook(() => useCounter(0));
+      
+      act(() => {
+        result.current.increment();
+      });
+      
+      expect(result.current.count).toBe(1);
+    });
+  });
+
+  // ✅ API 서비스 테스트 예시
+  describe('userApi', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('사용자 목록을 성공적으로 가져온다', async () => {
+      const mockUsers = [{ id: 1, name: 'John' }];
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockUsers),
+      } as Response);
+
+      const users = await userApi.getUsers();
+      expect(users).toEqual(mockUsers);
+    });
+
+    it('네트워크 에러를 처리한다', async () => {
+      vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'));
+      
+      await expect(userApi.getUsers()).rejects.toThrow('Network error');
+    });
+  });
+  ```
+
+  ## 🚀 고급 테스트 패턴:
+
+  ### 1. 테스트 유틸리티:
+  ```typescript
+  // 커스텀 렌더 함수
+  const renderWithProviders = (ui: ReactElement, options = {}) => {
+    const Wrapper = ({ children }: { children: ReactNode }) => (
+      <ThemeProvider theme={testTheme}>
+        <QueryClient client={testQueryClient}>
+          {children}
+        </QueryClient>
+      </ThemeProvider>
+    );
+
+    return render(ui, { wrapper: Wrapper, ...options });
+  };
+
+  // 공통 테스트 데이터
+  const createMockUser = (overrides = {}) => ({
+    id: 1,
+    name: 'Test User',
+    email: 'test@example.com',
+    ...overrides,
+  });
+  ```
+
+  ### 2. 성능 테스트:
+  ```typescript
+  // 렌더링 성능 측정
+  const measureRenderTime = (component: ReactElement) => {
+    const start = performance.now();
+    render(component);
+    const end = performance.now();
+    return end - start;
+  };
+
+  // 메모리 사용량 테스트
+  const testMemoryLeak = async (component: ReactElement) => {
+    const { unmount } = render(component);
+    // 메모리 사용량 측정 로직
+    unmount();
+    // 정리 후 메모리 사용량 확인
+  };
+  ```
+
+  ### 3. 통합 테스트:
+  ```typescript
+  // E2E 스타일 테스트
+  describe('사용자 플로우', () => {
+    it('로그인부터 데이터 조회까지 완전한 플로우를 테스트한다', async () => {
+      const user = userEvent.setup();
+      
+      render(<App />);
+      
+      // 로그인
+      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+      await user.type(screen.getByLabelText(/password/i), 'password');
+      await user.click(screen.getByRole('button', { name: /login/i }));
+      
+      // 데이터 로딩 대기
+      await waitFor(() => {
+        expect(screen.getByText(/welcome/i)).toBeInTheDocument();
+      });
+      
+      // 데이터 조회
+      await user.click(screen.getByRole('button', { name: /load data/i }));
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('data-list')).toBeInTheDocument();
+      });
+    });
+  });
+  ```
+
+  ## 📋 출력 형식:
+
+  ---
+  ## 📄 파일: `원본파일명.test.ts` 또는 `원본파일명.test.tsx`
+  ```typescript
+  [포괄적인 테스트 코드]
+  [자동 감지된 테스트 타입에 맞는 테스트 케이스]
+  [성능, 접근성, 에러 처리 테스트 포함]
+  [실용적이고 유지보수 가능한 테스트]
+  ```
+
+  ---
+
+  **중요 규칙:**
+  - 설명 없이 실행 가능한 테스트 코드만 출력
+  - 코드 타입을 자동 감지하여 적절한 테스트 작성
+  - 모든 테스트에 명확한 설명과 그룹화 적용
+  - 성능과 접근성 테스트 반드시 포함
+  - 실제 버그를 찾을 수 있는 의미있는 테스트 작성
+  - Mock과 테스트 유틸리티 적절히 활용
+  - 에지 케이스와 에러 시나리오 충분히 커버
+
+  지금 바로 위 형식으로 테스트 코드를 출력하세요:

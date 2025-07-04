@@ -1,0 +1,299 @@
+id: refactor-store-rtk
+model: gemini-pro
+temperature: 0.1
+input_vars: ["code", "structure"]
+prompt: |
+  시니어 프론트엔드 아키텍트로서 다음 Redux Toolkit 상태 관리 코드를 성능, 예측 가능성, 확장성에 중점을 두고 리팩토링하세요.
+
+  원본 코드:
+  ```typescript
+  {{code}}
+  ```
+
+  ## 🛠️ Redux Toolkit 리팩토링 핵심 원칙:
+
+  ### 1. Slice 구조 최적화:
+  - ✅ createSlice로 보일러플레이트 최소화
+  - ✅ 불변성 자동 처리 (Immer 내장)
+  - ✅ 액션 크리에이터 자동 생성
+  - ✅ 타입 안전한 상태 관리
+
+  ### 2. 비동기 처리 (RTK Query):
+  - ✅ createApi로 데이터 페칭 표준화
+  - ✅ 캐싱, 무효화, 백그라운드 업데이트
+  - ✅ 낙관적 업데이트 구현
+  - ✅ 에러 처리 및 재시도 로직
+
+  ### 3. 성능 최적화:
+  - ✅ createSelector로 메모이제이션
+  - ✅ 정규화된 상태 구조
+  - ✅ 선택적 구독 패턴
+  - ✅ 배치 업데이트 처리
+
+  ### 4. 타입 안전성:
+  - ✅ RootState, AppDispatch 타입 정의
+  - ✅ 타입화된 훅 (useAppSelector, useAppDispatch)
+  - ✅ PayloadAction 타입 안전성
+  - ✅ 미들웨어 타입 지원
+
+  ## 🔧 Redux Toolkit 개선 패턴:
+
+  ```typescript
+  // ✅ 타입 정의
+  interface User {
+    id: string;
+    name: string;
+    email: string;
+    isActive: boolean;
+  }
+
+  interface UserState {
+    entities: Record<string, User>;
+    ids: string[];
+    loading: boolean;
+    error: string | null;
+    selectedUserId: string | null;
+  }
+
+  // ✅ createSlice 활용
+  const userSlice = createSlice({
+    name: 'users',
+    initialState: {
+      entities: {},
+      ids: [],
+      loading: false,
+      error: null,
+      selectedUserId: null,
+    } as UserState,
+    reducers: {
+      setLoading: (state, action: PayloadAction<boolean>) => {
+        state.loading = action.payload;
+      },
+      setError: (state, action: PayloadAction<string | null>) => {
+        state.error = action.payload;
+      },
+      setUsers: (state, action: PayloadAction<User[]>) => {
+        state.entities = {};
+        state.ids = [];
+        action.payload.forEach(user => {
+          state.entities[user.id] = user;
+          state.ids.push(user.id);
+        });
+      },
+      addUser: (state, action: PayloadAction<User>) => {
+        const user = action.payload;
+        state.entities[user.id] = user;
+        state.ids.push(user.id);
+      },
+      updateUser: (state, action: PayloadAction<{ id: string; updates: Partial<User> }>) => {
+        const { id, updates } = action.payload;
+        if (state.entities[id]) {
+          Object.assign(state.entities[id], updates);
+        }
+      },
+      removeUser: (state, action: PayloadAction<string>) => {
+        const id = action.payload;
+        delete state.entities[id];
+        state.ids = state.ids.filter(userId => userId !== id);
+      },
+      selectUser: (state, action: PayloadAction<string | null>) => {
+        state.selectedUserId = action.payload;
+      },
+    },
+  });
+
+  // ✅ createAsyncThunk 활용
+  const fetchUsers = createAsyncThunk(
+    'users/fetchUsers',
+    async (_, { rejectWithValue }) => {
+      try {
+        const response = await api.getUsers();
+        return response.data;
+      } catch (error) {
+        return rejectWithValue(error.message);
+      }
+    }
+  );
+
+  const updateUserAsync = createAsyncThunk(
+    'users/updateUser',
+    async ({ id, updates }: { id: string; updates: Partial<User> }, { rejectWithValue }) => {
+      try {
+        const response = await api.updateUser(id, updates);
+        return { id, updates: response.data };
+      } catch (error) {
+        return rejectWithValue(error.message);
+      }
+    }
+  );
+
+  // ✅ extraReducers로 비동기 액션 처리
+  const userSliceWithAsync = createSlice({
+    name: 'users',
+    initialState,
+    reducers: userSlice.reducers,
+    extraReducers: (builder) => {
+      builder
+        .addCase(fetchUsers.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(fetchUsers.fulfilled, (state, action) => {
+          state.loading = false;
+          userSlice.caseReducers.setUsers(state, action);
+        })
+        .addCase(fetchUsers.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload as string;
+        })
+        .addCase(updateUserAsync.fulfilled, (state, action) => {
+          userSlice.caseReducers.updateUser(state, action);
+        });
+    },
+  });
+
+  // ✅ 메모이제이션된 셀렉터
+  const selectUserState = (state: RootState) => state.users;
+  const selectAllUsers = createSelector(
+    [selectUserState],
+    (userState) => userState.ids.map(id => userState.entities[id])
+  );
+  const selectActiveUsers = createSelector(
+    [selectAllUsers],
+    (users) => users.filter(user => user.isActive)
+  );
+  const selectUserById = createSelector(
+    [selectUserState, (state: RootState, userId: string) => userId],
+    (userState, userId) => userState.entities[userId]
+  );
+  const selectSelectedUser = createSelector(
+    [selectUserState],
+    (userState) => userState.selectedUserId 
+      ? userState.entities[userState.selectedUserId] 
+      : null
+  );
+  ```
+
+  ## 🚀 RTK Query 패턴:
+
+  ```typescript
+  // ✅ RTK Query API 정의
+  const userApi = createApi({
+    reducerPath: 'userApi',
+    baseQuery: fetchBaseQuery({
+      baseUrl: '/api/users',
+      prepareHeaders: (headers, { getState }) => {
+        const token = (getState() as RootState).auth.token;
+        if (token) {
+          headers.set('authorization', `Bearer ${token}`);
+        }
+        return headers;
+      },
+    }),
+    tagTypes: ['User'],
+    endpoints: (builder) => ({
+      getUsers: builder.query<User[], void>({
+        query: () => '',
+        providesTags: ['User'],
+      }),
+      getUserById: builder.query<User, string>({
+        query: (id) => `/${id}`,
+        providesTags: (result, error, id) => [{ type: 'User', id }],
+      }),
+      addUser: builder.mutation<User, Omit<User, 'id'>>({
+        query: (newUser) => ({
+          url: '',
+          method: 'POST',
+          body: newUser,
+        }),
+        invalidatesTags: ['User'],
+      }),
+      updateUser: builder.mutation<User, { id: string; updates: Partial<User> }>({
+        query: ({ id, updates }) => ({
+          url: `/${id}`,
+          method: 'PATCH',
+          body: updates,
+        }),
+        invalidatesTags: (result, error, { id }) => [{ type: 'User', id }],
+        // ✅ 낙관적 업데이트
+        onQueryStarted: async ({ id, updates }, { dispatch, queryFulfilled }) => {
+          const patchResult = dispatch(
+            userApi.util.updateQueryData('getUserById', id, (draft) => {
+              Object.assign(draft, updates);
+            })
+          );
+          try {
+            await queryFulfilled;
+          } catch {
+            patchResult.undo();
+          }
+        },
+      }),
+      deleteUser: builder.mutation<void, string>({
+        query: (id) => ({
+          url: `/${id}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: (result, error, id) => [{ type: 'User', id }],
+      }),
+    }),
+  });
+
+  // ✅ 자동 생성된 훅
+  const {
+    useGetUsersQuery,
+    useGetUserByIdQuery,
+    useAddUserMutation,
+    useUpdateUserMutation,
+    useDeleteUserMutation,
+  } = userApi;
+  ```
+
+  ## 🏪 Store 설정:
+
+  ```typescript
+  // ✅ 타입 안전한 스토어 설정
+  const store = configureStore({
+    reducer: {
+      users: userSliceWithAsync.reducer,
+      userApi: userApi.reducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        },
+      }).concat(userApi.middleware),
+  });
+
+  export type RootState = ReturnType<typeof store.getState>;
+  export type AppDispatch = typeof store.dispatch;
+
+  // ✅ 타입화된 훅
+  export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+  export const useAppDispatch = () => useDispatch<AppDispatch>();
+  ```
+
+  ## 📋 출력 형식:
+
+  ---
+  ## 📄 파일: `개선된_파일명.ts`
+  ```typescript
+  [리팩토링된 Redux Toolkit 상태 관리 코드]
+  [createSlice, createAsyncThunk, RTK Query 활용]
+  [정규화된 상태, 메모이제이션된 셀렉터 포함]
+  [타입 안전성, 성능 최적화 적용]
+  [JSDoc 문서화 포함]
+  ```
+
+  ---
+
+  **중요 규칙:**
+  - 설명 없이 실행 가능한 코드만 출력
+  - Redux Toolkit 최신 패턴 및 베스트 프랙티스 적용
+  - 모든 액션과 셀렉터에 JSDoc 문서화 추가
+  - 정규화된 상태 구조로 성능 최적화
+  - RTK Query 활용한 서버 상태 관리
+  - 타입 안전성과 개발자 경험 동시 고려
+
+  지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:

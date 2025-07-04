@@ -1,0 +1,69 @@
+{
+  "mcpVersion": "1.0.0",
+  "name": "React Performance Analyzer",
+  "description": "Gemini CLI + MCP tool for React performance analysis and optimization",
+  "tasks": [
+    {
+      "id": "performance_analysis",
+      "name": "React Performance Analysis",
+      "prompt": "prompts/performance.yaml",
+      "inputs": [
+        {
+          "code": "inputs/code/*.tsx",
+          "structure": "inputs/context/structure.txt",
+          "output": "outputs/performance/"
+        }
+      ],
+      "description": "Analyze React components for unnecessary rerendering and performance issues"
+    },
+    {
+      "id": "code_refactoring",
+      "name": "Code Refactoring",
+      "prompt": "prompts/refactor.yaml",
+      "inputs": [
+        {
+          "code": "inputs/code/*.tsx",
+          "structure": "inputs/context/structure.txt",
+          "output": "outputs/refactored/"
+        }
+      ],
+      "description": "Refactor React components with performance optimizations"
+    },
+    {
+      "id": "test_generation",
+      "name": "Test Code Generation",
+      "prompt": "prompts/testgen.yaml",
+      "inputs": [
+        {
+          "code": "inputs/code/*.tsx",
+          "output": "outputs/tests/"
+        }
+      ],
+      "description": "Generate comprehensive test suites for React components"
+    },
+    {
+      "id": "structure_analysis",
+      "name": "Project Structure Analysis",
+      "prompt": "prompts/folder_analysis.yaml",
+      "inputs": [
+        {
+          "structure": "inputs/context/structure.txt",
+          "output": "outputs/advice/"
+        }
+      ],
+      "description": "Analyze and improve project folder structure"
+    }
+  ],
+  "settings": {
+    "model": "gemini-pro",
+    "temperature": 0.3,
+    "maxTokens": 4096,
+    "streamOutput": true
+  },
+  "paths": {
+    "inputs": "inputs/",
+    "outputs": "outputs/",
+    "prompts": "prompts/",
+    "config": "config/"
+  }
+}
