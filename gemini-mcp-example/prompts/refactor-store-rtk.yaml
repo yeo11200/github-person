@@ -10,6 +10,17 @@ prompt: |
   {{code}}
   ```
 
+  프로젝트 구조:
+  ```
+  {{structure}}
+  ```
+
+  ## 📁 Import 경로 규칙:
+  - ✅ **절대경로 우선**: tsconfig에 `@/*` 또는 절대경로 설정이 있으면 반드시 절대경로 사용
+  - ✅ **일관성 유지**: 기존 코드의 import 패턴 분석 후 동일한 방식 적용
+  - ✅ **예시**: `import { ApiService } from '@/services/api'` (절대경로 설정시)
+  - ✅ **예시**: `import { User } from '@/types/user'` (절대경로 설정시)
+
   ## 🛠️ Redux Toolkit 리팩토링 핵심 원칙:
 
   ### 1. Slice 구조 최적화:
@@ -39,6 +50,13 @@ prompt: |
   ## 🔧 Redux Toolkit 개선 패턴:
 
   ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+  import { createSelector } from '@reduxjs/toolkit';
+  import { ApiService } from '@/services/api';
+  import { User } from '@/types/user';
+  import type { RootState } from '@/store';
+
   // ✅ 타입 정의
   interface User {
     id: string;
@@ -107,7 +125,7 @@ prompt: |
     'users/fetchUsers',
     async (_, { rejectWithValue }) => {
       try {
-        const response = await api.getUsers();
+        const response = await ApiService.getUsers();
         return response.data;
       } catch (error) {
         return rejectWithValue(error.message);
@@ -119,7 +137,7 @@ prompt: |
     'users/updateUser',
     async ({ id, updates }: { id: string; updates: Partial<User> }, { rejectWithValue }) => {
       try {
-        const response = await api.updateUser(id, updates);
+        const response = await ApiService.updateUser(id, updates);
         return { id, updates: response.data };
       } catch (error) {
         return rejectWithValue(error.message);
@@ -177,6 +195,11 @@ prompt: |
   ## 🚀 RTK Query 패턴:
 
   ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+  import { User } from '@/types/user';
+  import type { RootState } from '@/store';
+
   // ✅ RTK Query API 정의
   const userApi = createApi({
     reducerPath: 'userApi',
@@ -252,6 +275,11 @@ prompt: |
   ## 🏪 Store 설정:
 
   ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { configureStore } from '@reduxjs/toolkit';
+  import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+  import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
+
   // ✅ 타입 안전한 스토어 설정
   const store = configureStore({
     reducer: {
@@ -280,7 +308,7 @@ prompt: |
   ## 📄 파일: `개선된_파일명.ts`
   ```typescript
   [리팩토링된 Redux Toolkit 상태 관리 코드]
-  [createSlice, createAsyncThunk, RTK Query 활용]
+  [절대경로 우선 사용, createSlice, createAsyncThunk, RTK Query 활용]
   [정규화된 상태, 메모이제이션된 셀렉터 포함]
   [타입 안전성, 성능 최적화 적용]
   [JSDoc 문서화 포함]
@@ -295,5 +323,6 @@ prompt: |
   - 정규화된 상태 구조로 성능 최적화
   - RTK Query 활용한 서버 상태 관리
   - 타입 안전성과 개발자 경험 동시 고려
+  - **절대경로 설정이 있으면 반드시 절대경로 사용**
 
   지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:

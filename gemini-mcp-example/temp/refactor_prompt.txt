@@ -1,0 +1,437 @@
+  10년차 시니어 프론트엔드 아키텍트로서 다음 코드를 컴포넌트 폴더 컨벤션에 맞게 완전히 리팩토링하세요.
+
+  원본 코드:
+  ```tsx
+import React from "react";
+import styles from "./Modal.module.scss";
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  message: string;
+  type: "alert" | "confirm";
+  onConfirm?: () => void;
+  confirmText?: string;
+  cancelText?: string;
+}
+
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  message,
+  type,
+  onConfirm,
+  confirmText = "확인",
+  cancelText = "취소",
+}) => {
+  if (!isOpen) return null;
+
+  const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm();
+    }
+    onClose();
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={handleBackdropClick}>
+      <div className={styles.modalContent}>
+        <div className={styles.modalHeader}>
+          <h3 className={styles.modalTitle}>{title}</h3>
+        </div>
+
+        <div className={styles.modalBody}>
+          <p className={styles.modalMessage}>{message}</p>
+        </div>
+
+        <div className={styles.modalFooter}>
+          {type === "confirm" && (
+            <button
+              className={`${styles.modalBtn} ${styles.cancelBtn}`}
+              onClick={onClose}
+            >
+              {cancelText}
+            </button>
+          )}
+          <button
+            className={`${styles.modalBtn} ${styles.confirmBtn}`}
+            onClick={handleConfirm}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Modal;
+  ```
+
+  프로젝트 구조:
+  ```
+=== 프로젝트 전체 구조 ===
+.
+├── MCP_자동화_시스템_정리.md
+├── README.md
+├── eslint.config.js
+├── gemini-mcp-example
+│   ├── README.md
+│   ├── config
+│   │   └── mcp.config.json
+│   ├── inputs
+│   │   ├── code
+│   │   │   ├── Header.tsx
+│   │   │   └── index.ts
+│   │   └── context
+│   │       └── structure.txt
+│   ├── outputs
+│   │   ├── advice
+│   │   │   └── structure.advice.md
+│   │   ├── backups
+│   │   ├── migration
+│   │   ├── performance
+│   │   │   ├── Button.performance.md
+│   │   │   ├── CommitStatsPopup.performance.md
+│   │   │   ├── Header.performance.md
+│   │   │   ├── Layout.performance.md
+│   │   │   └── Modal.performance.md
+│   │   ├── refactored
+│   │   │   ├── Header_refactored_structure.md
+│   │   │   ├── local-storage_utils_refactored.md
+│   │   │   ├── local-storage_zustand_refactored.md
+│   │   │   └── src
+│   │   ├── structure
+│   │   │   └── analysis.md
+│   │   └── tests
+│   ├── prompts
+│   │   ├── folder_analysis.yaml
+│   │   ├── migration.yaml
+│   │   ├── performance.yaml
+│   │   ├── refactor-apis.yaml
+│   │   ├── refactor-store-rtk.yaml
+│   │   ├── refactor-store-zustand.yaml
+│   │   ├── refactor-store.yaml
+│   │   ├── refactor-utils.yaml
+│   │   ├── refactor.yaml
+│   │   ├── testgen-component.yaml
+│   │   ├── testgen-logic.yaml
+│   │   └── testgen.yaml
+│   └── temp
+│       ├── refactor_output.md
+│       ├── refactor_prompt.txt
+│       ├── testgen_output.md
+│       └── testgen_prompt.txt
+├── gemini-mcp-example.zip
+├── index.html
+├── mcp-auto-run.sh
+├── package.json
+├── pnpm-lock.yaml
+├── public
+│   └── vite.svg
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── apis
+│   │   ├── index.ts
+│   │   └── resume-api.ts
+│   ├── assets
+│   │   ├── favicon.png
+│   │   ├── logo.png
+│   │   └── react.svg
+│   ├── components
+│   │   ├── CommitStatsPopup
+│   │   │   ├── CommitStatsPopup.module.scss
+│   │   │   ├── CommitStatsPopup.tsx
+│   │   │   └── index.ts
+│   │   ├── Header
+│   │   │   ├── Header.module.scss
+│   │   │   ├── Header.tsx
+│   │   │   └── index.ts
+│   │   ├── Layout
+│   │   │   ├── Layout.module.scss
+│   │   │   ├── Layout.tsx
+│   │   │   └── index.ts
+│   │   ├── Modal
+│   │   │   ├── Modal.module.scss
+│   │   │   └── Modal.tsx
+│   │   └── MonthlyCommitChart
+│   │       ├── MonthlyCommitChart.module.scss
+│   │       ├── MonthlyCommitChart.tsx
+│   │       └── index.ts
+│   ├── contexts
+│   │   ├── AuthContext.tsx
+│   │   └── RepositoryContext.tsx
+│   ├── index.css
+│   ├── main.tsx
+│   ├── pages
+│   │   ├── Callback
+│   │   │   ├── Callback.module.scss
+│   │   │   ├── Callback.tsx
+│   │   │   └── index.ts
+│   │   ├── Dashboard
+│   │   │   ├── Dashboard.module.scss
+│   │   │   ├── Dashboard.tsx
+│   │   │   └── index.ts
+│   │   ├── Home
+│   │   │   ├── Home.module.scss
+│   │   │   ├── Home.tsx
+│   │   │   └── index.ts
+│   │   ├── NotFound.tsx
+│   │   ├── RepoSelect
+│   │   │   ├── RepoSelect.module.scss
+│   │   │   ├── RepoSelect.tsx
+│   │   │   └── index.ts
+│   │   └── RepoSummary
+│   │       ├── RepoSummary.module.scss
+│   │       ├── RepoSummary.tsx
+│   │       └── index.ts
+│   ├── router
+│   │   └── index.tsx
+│   ├── store
+│   │   ├── useCommitStats.tsx
+│   │   └── useMyAgent.tsx
+│   ├── styles
+│   │   ├── NotFound.scss
+│   │   └── Profile.scss
+│   ├── types
+│   │   └── apis
+│   │       ├── github-commit.ts
+│   │       ├── github-my.ts
+│   │       ├── github-repo.ts
+│   │       ├── github-resume.ts
+│   │       └── index.ts
+│   ├── utils
+│   │   ├── fetch-api.ts
+│   │   ├── index.ts
+│   │   └── local-storage.ts
+│   └── vite-env.d.ts
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vercel.json
+└── vite.config.ts
+
+40 directories, 100 files
+
+=== React 파일 목록 ===
+./gemini-mcp-example/outputs/refactored/src/components/Modal/Modal.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/DesktopNavigation.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/MobileNavigation.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/UserInfo.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Logo.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Header.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/HamburgerButton.tsx
+./gemini-mcp-example/outputs/refactored/src/store/useMyAgent.tsx
+./src/App.tsx
+./src/main.tsx
+./src/contexts/RepositoryContext.tsx
+./src/contexts/AuthContext.tsx
+./src/components/MonthlyCommitChart/MonthlyCommitChart.tsx
+./src/components/CommitStatsPopup/CommitStatsPopup.tsx
+./src/components/Layout/Layout.tsx
+./src/components/Modal/Modal.tsx
+./src/components/Header/Header.tsx
+./src/pages/Home/Home.tsx
+./src/pages/RepoSelect/RepoSelect.tsx
+./src/pages/Dashboard/Dashboard.tsx
+
+=== 패키지 정보 ===
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.0",
+    "dayjs": "^1.11.13",
+    "proxy-memoize": "^3.0.1",
+    "react": "^19.1.0",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.6.1",
+    "zustand": "^5.0.5"
+  ```
+
+  ## 🏗️ 필수 컴포넌트 폴더 컨벤션:
+  ```
+  ComponentName/
+  ├── ui/                        # UI 컴포넌트들
+  │   ├── ComponentName.tsx      # 메인 컴포넌트 (조합만 담당)
+  │   ├── SubComponent1.tsx      # 하위 컴포넌트
+  │   ├── SubComponent2.tsx      # 하위 컴포넌트
+  │   └── EmptyState.tsx         # 상태별 컴포넌트
+  ├── model/                     # 비즈니스 로직 (커스텀 훅)
+  │   ├── useComponentName.ts    # 메인 로직
+  │   ├── useSubComponent1.ts    # 하위 로직 (필요시)
+  │   └── useSubComponent2.ts    # 하위 로직 (필요시)
+  ├── lib/                       # 순수 함수 및 유틸리티
+  │   ├── calculations.ts        # 계산 로직
+  │   ├── validators.ts          # 검증 로직
+  │   └── formatters.ts          # 포맷팅 로직
+  └── index.ts                   # Barrel export
+  ```
+
+  ## 📁 Import 경로 규칙:
+  - ✅ **절대경로 우선**: tsconfig에 `@/*` 또는 절대경로 설정이 있으면 반드시 절대경로 사용
+  - ✅ **일관성 유지**: 기존 코드의 import 패턴 분석 후 동일한 방식 적용
+  - ✅ **예시**: `import { useAuth } from '@/contexts/AuthContext'` (절대경로 설정시)
+  - ✅ **예시**: `import { useAuth } from '../../contexts/AuthContext'` (상대경로만 있을 시)
+
+  ## 🎯 리팩토링 전략:
+  1. **UI/Model/Lib 완전 분리**: 관심사에 따른 명확한 폴더 분리
+  2. **UI 컴포넌트 세분화**: 의미있는 UI 단위를 별도 컴포넌트로 분리
+  3. **비즈니스 로직 격리**: 모든 상태/핸들러를 `model/` 폴더의 커스텀 훅으로 분리
+  4. **순수 함수 분리**: 계산, 검증, 포맷팅 로직을 `lib/` 폴더로 분리
+  5. **재사용성 극대화**: 각 컴포넌트와 로직이 독립적으로 사용 가능하도록 설계
+  6. **성능 최적화**: React.memo, useCallback, useMemo 정확한 원칙으로 적용
+  7. **TypeScript 강화**: 인터페이스와 타입 안전성
+  8. **Import 경로 최적화**: 절대경로 설정 감지 후 일관된 경로 사용
+
+  ## 🔧 컴포넌트 분리 기준:
+
+  ### UI 컴포넌트 (`ui/` 폴더):
+  - ✅ **메인 컴포넌트**: 전체 UI 조합 담당
+  - ✅ **하위 컴포넌트**: 독립적인 UI 단위 (10줄 이상 JSX)
+  - ✅ **상태별 컴포넌트**: Empty, Loading, Error 상태 컴포넌트
+  - ✅ **재사용 가능한 UI**: 다른 곳에서도 사용될 수 있는 컴포넌트
+
+  ### Model 로직 (`model/` 폴더):
+  - ✅ **메인 커스텀 훅**: 전체 컴포넌트의 상태와 로직
+  - ✅ **하위 커스텀 훅**: 특정 기능별 로직 분리
+  - ✅ **비즈니스 로직**: API 호출, 상태 관리, 이벤트 핸들링
+  - ✅ **사이드 이펙트**: useEffect, 외부 상태 연동
+
+  ### Lib 유틸리티 (`lib/` 폴더):
+  - ✅ **순수 함수**: 사이드 이펙트 없는 계산 로직
+  - ✅ **검증 함수**: 데이터 유효성 검사
+  - ✅ **포맷팅 함수**: 데이터 변환 및 표시 형식
+  - ✅ **상수 및 설정**: 컴포넌트별 상수값
+
+  ## ⚡ React 성능 최적화 핵심 원칙:
+
+  ### useCallback 사용 시점 (정확한 원칙):
+  - ✅ **자식 컴포넌트에 함수를 props로 넘길 때**
+  - ✅ **useEffect 등 의존성으로 함수를 넣어야 할 때**
+  - ✅ **이벤트 핸들러가 자주 재생성되어 성능 이슈가 있을 때**
+  - ❌ 단순히 컴포넌트 내부에서만 사용하는 함수는 불필요
+
+  ### useMemo 사용 시점 (정확한 원칙):
+  - ✅ **무거운 계산 결과를 캐싱할 때**
+  - ✅ **자식 컴포넌트에 객체/배열을 props로 넘길 때**
+  - ✅ **useEffect 의존성으로 객체/배열을 넣어야 할 때**
+  - ❌ 단순한 문자열이나 숫자 계산은 불필요
+
+  ### React.memo 사용 시점:
+  - ✅ **props가 자주 변경되지 않는 컴포넌트**
+  - ✅ **렌더링 비용이 높은 컴포넌트**
+  - ✅ **부모가 자주 리렌더링되는 자식 컴포넌트**
+
+  ## 🔧 구체적인 적용 예시:
+
+  ```tsx
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { useAuth } from '@/contexts/AuthContext';
+  import { Button } from '@/components/ui/Button';
+  import styles from './ComponentName.module.scss';
+
+  // ✅ 올바른 useCallback 사용
+  const handleClick = useCallback(() => {
+    doSomething();
+  }, [dependency]); // 자식에게 props로 전달하거나 useEffect 의존성일 때
+
+  // ✅ 올바른 useMemo 사용
+  const expensiveValue = useMemo(() => {
+    return heavyCalculation(data);
+  }, [data]); // 무거운 계산이거나 자식에게 전달할 객체/배열
+
+  // ❌ 불필요한 useCallback
+  const simpleHandler = () => console.log('click'); // 내부에서만 사용
+
+  // ❌ 불필요한 useMemo
+  const simpleValue = useMemo(() => a + b, [a, b]); // 단순 계산
+  ```
+
+  ## 📋 출력 형식 (정확히 이 구조로):
+
+  ---
+  ## 📄 파일: `model/useComponentName.ts`
+  ```tsx
+  [메인 커스텀 훅 코드 - 전체 비즈니스 로직 포함]
+  [절대경로 우선 사용, 올바른 useCallback/useMemo 원칙 적용]
+  ```
+
+  ---
+  ## 📄 파일: `model/useSubComponent.ts`
+  ```tsx
+  [하위 커스텀 훅 코드 - 특정 기능별 로직]
+  [재사용 가능한 독립적 로직]
+  ```
+
+  ---
+  ## 📄 파일: `lib/calculations.ts`
+  ```tsx
+  [순수 함수 코드 - 계산 로직]
+  [사이드 이펙트 없는 유틸리티 함수]
+  ```
+
+  ---
+  ## 📄 파일: `lib/validators.ts`
+  ```tsx
+  [검증 함수 코드 - 데이터 유효성 검사]
+  [타입 가드 및 검증 로직]
+  ```
+
+  ---
+  ## 📄 파일: `ui/SubComponent1.tsx`
+  ```tsx
+  [하위 UI 컴포넌트 코드 - 독립적인 UI 단위]
+  [React.memo 적용, 타입 안전성 보장]
+  ```
+
+  ---
+  ## 📄 파일: `ui/SubComponent2.tsx`
+  ```tsx
+  [하위 UI 컴포넌트 코드 - 독립적인 UI 단위]
+  [React.memo 적용, 타입 안전성 보장]
+  ```
+
+  ---
+  ## 📄 파일: `ui/ComponentName.tsx`  
+  ```tsx
+  [메인 UI 컴포넌트 코드 - 하위 컴포넌트들 조합만 담당]
+  [절대경로 우선 사용, React.memo 적용 및 성능 최적화]
+  ```
+
+  ---
+  ## 📄 파일: `index.ts`
+  ```tsx
+  // 메인 컴포넌트만 export (내부 구조 숨김)
+  export { default } from './ui/ComponentName';
+
+  // 필요시 타입들도 export
+  export type { ComponentNameProps } from './ui/ComponentName';
+  ```
+
+  ---
+
+  **중요 규칙:**
+  - 설명 없이 실행 가능한 코드만 출력
+  - 각 파일을 명확히 구분하여 표시
+  - 모든 주석은 한국어로 작성
+  - 원본 기능을 모두 유지하면서 개선
+  - useCallback/useMemo는 정확한 원칙에 따라서만 사용
+  - **UI/Model/Lib 구조를 반드시 준수**
+  - **절대경로 설정이 있으면 반드시 절대경로 사용**
+
+  지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:

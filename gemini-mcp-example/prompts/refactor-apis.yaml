@@ -10,6 +10,17 @@ prompt: |
   {{code}}
   ```
 
+  프로젝트 구조:
+  ```
+  {{structure}}
+  ```
+
+  ## 📁 Import 경로 규칙:
+  - ✅ **절대경로 우선**: tsconfig에 `@/*` 또는 절대경로 설정이 있으면 반드시 절대경로 사용
+  - ✅ **일관성 유지**: 기존 코드의 import 패턴 분석 후 동일한 방식 적용
+  - ✅ **예시**: `import { ApiResponse } from '@/types/api'` (절대경로 설정시)
+  - ✅ **예시**: `import { CONFIG } from '@/config/api'` (절대경로 설정시)
+
   ## 🔌 API 리팩토링 핵심 원칙:
 
   ### 1. 강력한 에러 처리:
@@ -45,6 +56,12 @@ prompt: |
   ## 🔧 구체적인 개선 패턴:
 
   ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { ApiResponse, ApiError } from '@/types/api';
+  import { Logger } from '@/utils/logger';
+  import { CONFIG } from '@/config/api';
+  import { TokenManager } from '@/services/auth';
+
   // ✅ API 응답 타입
   interface ApiResponse<T> {
     data: T;
@@ -101,7 +118,7 @@ prompt: |
   ## 📄 파일: `개선된_파일명.ts`
   ```typescript
   [리팩토링된 API 코드]
-  [에러 처리, 타입 안전성, 성능 최적화 적용]
+  [절대경로 우선 사용, 에러 처리, 타입 안전성, 성능 최적화 적용]
   [인터셉터, 캐싱, 재시도 로직 포함]
   [JSDoc 문서화 포함]
   ```
@@ -114,5 +131,6 @@ prompt: |
   - 에러 처리를 최우선으로 고려
   - 실제 프로덕션 환경에서 사용 가능한 수준
   - 성능과 보안을 동시에 고려
+  - **절대경로 설정이 있으면 반드시 절대경로 사용**
 
   지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:

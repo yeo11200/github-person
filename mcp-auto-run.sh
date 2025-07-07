@@ -219,14 +219,56 @@ save_parsed_file() {
     # 파일 경로 처리
     local output_path=""
     
-    if [[ "$filename" =~ ^hooks/ ]]; then
-        # hooks/ 폴더 파일인 경우
-        local component_dir=$(dirname "$base_output_dir")
-        output_path="$component_dir/$filename"
+    # base_output_dir에서 컴포넌트 폴더 경로 추출
+    local component_base_dir=$(dirname "$base_output_dir")
+    
+    # 절대경로 중복 제거 로직
+    if [[ "$filename" =~ ^src/components/[^/]+/(ui|model|lib)/ ]]; then
+        # 절대 경로 형태에서 컴포넌트 이름 추출
+        local component_name=$(echo "$filename" | sed -n 's|^src/components/\([^/]*\)/.*|\1|p')
+        local relative_part=$(echo "$filename" | sed "s|^src/components/$component_name/||")
+        
+        # 현재 base_output_dir에서 컴포넌트 이름 확인
+        if [[ "$component_base_dir" =~ $component_name ]]; then
+            # 중복 방지: 상대 경로만 사용
+            output_path="$component_base_dir/$relative_part"
+        else
+            # 전체 절대 경로 사용
+            output_path="$MCP_DIR/outputs/refactored/$filename"
+        fi
+    elif [[ "$filename" =~ ^src/components/[^/]+/[^/]+\.(tsx?|ts)$ ]]; then
+        # 컴포넌트 루트 파일 (src/components/Header/Header.tsx, src/components/Header/index.ts)
+        local component_name=$(echo "$filename" | sed -n 's|^src/components/\([^/]*\)/.*|\1|p')
+        local file_basename=$(basename "$filename")
+        
+        if [[ "$component_base_dir" =~ $component_name ]]; then
+            # 중복 방지: 컴포넌트 폴더 루트에 저장
+            if [[ "$file_basename" == "$component_name.tsx" ]] || [[ "$file_basename" == "$component_name.ts" ]]; then
+                # 메인 컴포넌트는 ui/ 폴더에 저장
+                output_path="$component_base_dir/ui/$file_basename"
+            else
+                # index.ts 등은 루트에 저장
+                output_path="$component_base_dir/$file_basename"
+            fi
+        else
+            output_path="$MCP_DIR/outputs/refactored/$filename"
+        fi
+    elif [[ "$filename" =~ ^(ui|model|lib)/ ]]; then
+        # 상대 경로 형태 (ui/Header.tsx, model/useHeader.ts, lib/calculations.ts)
+        output_path="$component_base_dir/$filename"
+    elif [[ "$filename" =~ ^hooks/ ]]; then
+        # 기존 hooks/ 구조 호환성 유지 (model/로 변경)
+        local new_filename="${filename#hooks/}"
+        output_path="$component_base_dir/model/$new_filename"
+        echo -e "${YELLOW}  ⚠️  hooks/ → model/ 경로로 변경: $filename${NC}"
+    elif [[ "$filename" =~ ^components/ ]]; then
+        # 기존 components/ 구조 호환성 유지 (ui/로 변경)
+        local new_filename="${filename#components/}"
+        output_path="$component_base_dir/ui/$new_filename"
+        echo -e "${YELLOW}  ⚠️  components/ → ui/ 경로로 변경: $filename${NC}"
     elif [[ "$filename" =~ / ]]; then
         # 다른 상대 경로가 있는 경우
-        local component_dir=$(dirname "$base_output_dir")
-        output_path="$component_dir/$filename"
+        output_path="$component_base_dir/$filename"
     else
         # 단순 파일명인 경우 기본 경로 사용
         local dir_path=$(dirname "$base_output_dir")
@@ -1813,13 +1855,13 @@ show_test_help() {
     echo -e "   ${GREEN}# Vitest 사용${NC}"
     echo -e "   npx vitest run                    # 모든 테스트 실행"
     echo -e "   npx vitest --coverage             # 커버리지 포함"
-    echo -e "   npx vitest --ui                   # UI 모드"
+    echo -e "   npx vitest --ui                   # UI 모드로 실행${NC}"
     echo -e "   npx vitest Header.test.tsx        # 특정 파일만"
     echo ""
     echo -e "   ${GREEN}# Jest 사용${NC}"
     echo -e "   npm test                          # 모든 테스트 실행"
     echo -e "   npm test -- --coverage            # 커버리지 포함"
-    echo -e "   npm test -- --watch               # 감시 모드"
+    echo -e "   npm test -- --watch               # 감시 모드로 실행${NC}"
     echo -e "   npm test Header.test.tsx          # 특정 파일만"
     echo ""
     echo -e "${CYAN}5. 테스트 설정 확인:${NC}"

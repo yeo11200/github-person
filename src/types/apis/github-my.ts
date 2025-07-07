@@ -28,3 +28,12 @@ export interface RepositoryMyUploadImage {
     uploadedAt: string;
   };
 }
+
+export interface User {
+  id: string;
+  email?: string;
+  name: string;
+  username: string;
+  avatar_url: string;
+  access_token: string;
+}

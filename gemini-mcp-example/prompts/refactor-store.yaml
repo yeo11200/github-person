@@ -10,6 +10,17 @@ prompt: |
   {{code}}
   ```
 
+  프로젝트 구조:
+  ```
+  {{structure}}
+  ```
+
+  ## 📁 Import 경로 규칙:
+  - ✅ **절대경로 우선**: tsconfig에 `@/*` 또는 절대경로 설정이 있으면 반드시 절대경로 사용
+  - ✅ **일관성 유지**: 기존 코드의 import 패턴 분석 후 동일한 방식 적용
+  - ✅ **예시**: `import { ApiService } from '@/services/api'` (절대경로 설정시)
+  - ✅ **예시**: `import { User } from '@/types/user'` (절대경로 설정시)
+
   ## 🏪 범용 상태 관리 리팩토링 핵심 원칙:
 
   ### 1. 상태 관리 라이브러리 자동 감지:
@@ -35,6 +46,12 @@ prompt: |
 
   ### Zustand 패턴:
   ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { create, StateCreator } from 'zustand';
+  import { devtools, persist } from 'zustand/middleware';
+  import { ApiService } from '@/services/api';
+  import { User } from '@/types/user';
+
   // 슬라이스 패턴 + 미들웨어
   const useStore = create<Store>()(
     devtools(
@@ -50,6 +67,11 @@ prompt: |
 
   ### Redux Toolkit 패턴:
   ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+  import { ApiService } from '@/services/api';
+  import { User } from '@/types/user';
+
   // createSlice + RTK Query
   const slice = createSlice({
     name: 'feature',
@@ -63,6 +85,11 @@ prompt: |
 
   ### Context API 패턴:
   ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { createContext, useContext, useMemo } from 'react';
+  import { ApiService } from '@/services/api';
+  import { User } from '@/types/user';
+
   // 분리된 컨텍스트 + 커스텀 훅
   const StateContext = createContext();
   const DispatchContext = createContext();
@@ -116,7 +143,7 @@ prompt: |
   ## 📄 파일: `개선된_파일명.ts`
   ```typescript
   [리팩토링된 상태 관리 코드]
-  [감지된 라이브러리에 맞는 최적화 패턴 적용]
+  [절대경로 우선 사용, 감지된 라이브러리에 맞는 최적화 패턴 적용]
   [타입 안전성, 성능 최적화, 테스트 용이성 보장]
   [JSDoc 문서화 포함]
   ```
@@ -129,5 +156,6 @@ prompt: |
   - 모든 액션과 셀렉터에 JSDoc 문서화 추가
   - 성능과 개발자 경험 동시 고려
   - 테스트하기 쉬운 구조로 설계
+  - **절대경로 설정이 있으면 반드시 절대경로 사용**
 
   지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:

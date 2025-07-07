@@ -1,5 +1,6 @@
 === 프로젝트 전체 구조 ===
 .
+├── MCP_자동화_시스템_정리.md
 ├── README.md
 ├── eslint.config.js
 ├── gemini-mcp-example
@@ -8,7 +9,8 @@
 │   │   └── mcp.config.json
 │   ├── inputs
 │   │   ├── code
-│   │   │   └── Header.tsx
+│   │   │   ├── Header.tsx
+│   │   │   └── index.ts
 │   │   └── context
 │   │       └── structure.txt
 │   ├── outputs
@@ -45,7 +47,10 @@
 │   │   └── testgen.yaml
 │   └── temp
 │       ├── refactor_output.md
-│       └── refactor_prompt.txt
+│       ├── refactor_prompt.txt
+│       ├── testgen_output.md
+│       └── testgen_prompt.txt
+├── gemini-mcp-example.zip
 ├── index.html
 ├── mcp-auto-run.sh
 ├── package.json
@@ -55,6 +60,9 @@
 ├── src
 │   ├── App.css
 │   ├── App.tsx
+│   ├── apis
+│   │   ├── index.ts
+│   │   └── resume-api.ts
 │   ├── assets
 │   │   ├── favicon.png
 │   │   ├── logo.png
@@ -119,6 +127,7 @@
 │   │       ├── github-commit.ts
 │   │       ├── github-my.ts
 │   │       ├── github-repo.ts
+│   │       ├── github-resume.ts
 │   │       └── index.ts
 │   ├── utils
 │   │   ├── fetch-api.ts
@@ -131,12 +140,16 @@
 ├── vercel.json
 └── vite.config.ts
 
-39 directories, 92 files
+40 directories, 100 files
 
 === React 파일 목록 ===
 ./gemini-mcp-example/outputs/refactored/src/components/Modal/Modal.tsx
-./gemini-mcp-example/outputs/refactored/src/components/Header/hooks/useHeader.tsx
-./gemini-mcp-example/outputs/refactored/src/components/Header/Header.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/DesktopNavigation.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/MobileNavigation.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/UserInfo.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Logo.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Header.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/HamburgerButton.tsx
 ./gemini-mcp-example/outputs/refactored/src/store/useMyAgent.tsx
 ./src/App.tsx
 ./src/main.tsx
@@ -150,10 +163,6 @@
 ./src/pages/Home/Home.tsx
 ./src/pages/RepoSelect/RepoSelect.tsx
 ./src/pages/Dashboard/Dashboard.tsx
-./src/pages/RepoSummary/RepoSummary.tsx
-./src/pages/Callback/Callback.tsx
-./src/pages/NotFound.tsx
-./src/store/useMyAgent.tsx
 
 === 패키지 정보 ===
     "dev": "vite",

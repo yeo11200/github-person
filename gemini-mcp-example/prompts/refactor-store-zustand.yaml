@@ -10,6 +10,17 @@ prompt: |
   {{code}}
   ```
 
+  프로젝트 구조:
+  ```
+  {{structure}}
+  ```
+
+  ## 📁 Import 경로 규칙:
+  - ✅ **절대경로 우선**: tsconfig에 `@/*` 또는 절대경로 설정이 있으면 반드시 절대경로 사용
+  - ✅ **일관성 유지**: 기존 코드의 import 패턴 분석 후 동일한 방식 적용
+  - ✅ **예시**: `import { ApiService } from '@/services/api'` (절대경로 설정시)
+  - ✅ **예시**: `import { User } from '@/types/user'` (절대경로 설정시)
+
   ## 🐻 Zustand 5.0+ 리팩토링 핵심 원칙:
 
   ### 1. Store 구조 최적화:
@@ -39,10 +50,13 @@ prompt: |
   ## 🔧 Zustand 5.0+ 개선 패턴:
 
   ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
   import { create, StateCreator } from 'zustand';
   import { devtools, persist, createJSONStorage } from 'zustand/middleware';
   import { immer } from 'zustand/middleware/immer';
   import { useShallow } from 'zustand/react/shallow';
+  import { ApiService } from '@/services/api';
+  import { User } from '@/types/user';
 
   // ✅ 타입 안전한 상태 정의
   interface UserState {
@@ -87,7 +101,7 @@ prompt: |
       }, false, 'fetchUsers/pending');
 
       try {
-        const users = await api.getUsers();
+        const users = await ApiService.getUsers();
         set((state) => {
           state.users = users;
           state.loading = false;
@@ -249,7 +263,7 @@ prompt: |
   ## 📄 파일: `개선된_파일명.ts`
   ```typescript
   [리팩토링된 Zustand 상태 관리 코드]
-  [슬라이스 패턴, 타입 안전성, 성능 최적화 적용]
+  [절대경로 우선 사용, 슬라이스 패턴, 타입 안전성, 성능 최적화 적용]
   [useShallow, 선택적 구독, 비동기 처리 포함]
   [JSDoc 문서화 포함]
   ```
@@ -264,5 +278,6 @@ prompt: |
   - 에러 처리에서 unknown 타입 사용
   - 테스트하기 쉬운 구조로 설계
   - 미들웨어 타입 순서 정확히 지정
+  - **절대경로 설정이 있으면 반드시 절대경로 사용**
 
   지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:
