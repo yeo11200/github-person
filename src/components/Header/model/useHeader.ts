@@ -6,24 +6,29 @@ import { useState, useEffect, useCallback } from "react";
 export const useHeader = () => {
   const { user, isAuthenticated, logout, loginWithGitHub } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   // 모바일 메뉴 토글 핸들러
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen((prev) => !prev);
   }, []);
+
   // 모바일 메뉴 닫기 핸들러
   const closeMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(false);
   }, []);
+
   // 로그아웃 핸들러
   const handleLogout = useCallback(() => {
     logout();
     closeMobileMenu();
   }, [logout, closeMobileMenu]);
+
   // 로그인 핸들러
   const handleLogin = useCallback(() => {
     loginWithGitHub();
     closeMobileMenu();
   }, [loginWithGitHub, closeMobileMenu]);
+
   // 모바일 메뉴가 열렸을 때 body 스크롤 방지
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -36,6 +41,7 @@ export const useHeader = () => {
       document.body.style.overflow = "unset";
     };
   }, [isMobileMenuOpen]);
+
   return {
     user,
     isAuthenticated,
