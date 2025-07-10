@@ -1,2 +1,2 @@
-export { default } from "./CommitStatsPopup";
-export * from "./CommitStatsPopup";
+export { default } from './CommitStatsPopup';
+export * from './CommitStatsPopup';

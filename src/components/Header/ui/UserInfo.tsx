@@ -1,6 +1,6 @@
-import React from "react";
-import styles from "../Header.module.scss";
-import type { User } from "@/types/apis";
+import React from 'react';
+import styles from '../Header.module.scss';
+import type { User } from '@/types/apis';
 
 interface UserInfoProps {
   user: User;
@@ -12,7 +12,7 @@ interface UserInfoProps {
 const UserInfo: React.FC<UserInfoProps> = ({ user }) => (
   <div className={styles.user}>
     <img
-      src={user.avatar_url || "/default-avatar.png"}
+      src={user.avatar_url || '/default-avatar.png'}
       alt={user.name}
       className={styles.userAvatar}
     />

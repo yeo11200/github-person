@@ -3,6 +3,6 @@ export interface APIResponse<T> {
   data: T;
   message?: string;
 }
-export * from "./github-repo"; // 또는 "githubRepo"
-export * from "./github-my";
-export * from "./github-commit";
+export * from './github-repo'; // 또는 "githubRepo"
+export * from './github-my';
+export * from './github-commit';

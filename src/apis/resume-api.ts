@@ -1,9 +1,9 @@
-import fetchApi from "@/utils/fetch-api";
-import type { APIResponse } from "@/types/apis";
-import type { Resume, ResumeList } from "@/types/apis/github-resume";
+import fetchApi from '@/utils/fetch-api';
+import type { APIResponse } from '@/types/apis';
+import type { Resume, ResumeList } from '@/types/apis/github-resume';
 
 const getResumeList = async () => {
-  const response = await fetchApi<APIResponse<ResumeList[]>>("/resume/list");
+  const response = await fetchApi<APIResponse<ResumeList[]>>('/resume/list');
   return response.data;
 };
 

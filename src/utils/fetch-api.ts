@@ -1,7 +1,7 @@
 const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 
 export type FetchOptions = {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
   body?: Record<string, unknown> | string | FormData | null;
   queryParams?: Record<string, string | number>;
@@ -14,7 +14,7 @@ const fetchApi = async <T>(
 ): Promise<T> => {
   try {
     const {
-      method = "GET",
+      method = 'GET',
       headers = {},
       body,
       queryParams,
@@ -26,12 +26,12 @@ const fetchApi = async <T>(
 
     // FormData가 아닌 경우에만 Content-Type 설정
     if (!(body instanceof FormData)) {
-      defaultHeaders["Content-Type"] = "application/json";
+      defaultHeaders['Content-Type'] = 'application/json';
     }
 
     // Authorization 헤더 추가 (토큰이 있고 includeAuth가 true인 경우)
     if (includeAuth) {
-      const token = localStorage.getItem("github_token");
+      const token = localStorage.getItem('github_token');
       if (token) {
         defaultHeaders.Authorization = `Bearer ${token}`;
       }
@@ -45,7 +45,7 @@ const fetchApi = async <T>(
 
     // Query Params 처리
     const queryString = queryParams
-      ? "?" +
+      ? '?' +
         new URLSearchParams(
           Object.entries(queryParams).reduce(
             (acc, [key, value]) => ({
@@ -55,7 +55,7 @@ const fetchApi = async <T>(
             {}
           )
         ).toString()
-      : "";
+      : '';
 
     // Base URL과 endpoint 결합
     const fullUrl = `${BASE_URL}${endpoint}${queryString}`;
@@ -67,18 +67,18 @@ const fetchApi = async <T>(
         body instanceof FormData
           ? body
           : body
-          ? JSON.stringify(body)
-          : undefined,
+            ? JSON.stringify(body)
+            : undefined,
     });
 
     if (!response.ok) {
       // 401 에러 시 토큰 정리 및 로그아웃 처리
       if (response.status === 401) {
-        localStorage.removeItem("github_token");
-        localStorage.removeItem("github_user");
+        localStorage.removeItem('github_token');
+        localStorage.removeItem('github_user');
         // 현재 페이지가 콜백이 아닌 경우에만 리다이렉트
-        if (!window.location.pathname.includes("/callback")) {
-          window.location.href = "/";
+        if (!window.location.pathname.includes('/callback')) {
+          window.location.href = '/';
         }
       }
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -87,7 +87,7 @@ const fetchApi = async <T>(
     const data = (await response.json()) as T;
     return data;
   } catch (error) {
-    console.error("Fetch API error:", error);
+    console.error('Fetch API error:', error);
     throw error;
   }
 };

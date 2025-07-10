@@ -1,7 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import type { User } from "@/types/apis";
-import styles from "../Header.module.scss";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import type { User } from '@/types/apis';
+import styles from '../Header.module.scss';
 interface MobileNavigationProps {
   isOpen: boolean;
   isAuthenticated: boolean;
@@ -24,13 +24,13 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 }) => (
   <>
     <nav
-      className={`${styles.mobileNav} ${isOpen ? styles.mobileNavOpen : ""}`}
+      className={`${styles.mobileNav} ${isOpen ? styles.mobileNavOpen : ''}`}
     >
       <div className={styles.mobileNavContent}>
         {isAuthenticated && user && (
           <div className={styles.mobileUser}>
             <img
-              src={user.avatar_url || "/default-avatar.png"}
+              src={user.avatar_url || '/default-avatar.png'}
               alt={user.name}
               className={styles.userAvatar}
             />

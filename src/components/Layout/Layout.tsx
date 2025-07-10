@@ -1,7 +1,7 @@
-import { Outlet, useLocation } from "react-router-dom";
-import Header from "../Header";
-import styles from "./Layout.module.scss";
-import { useEffect, useRef } from "react";
+import { Outlet, useLocation } from 'react-router-dom';
+import Header from '../Header';
+import styles from './Layout.module.scss';
+import { useEffect, useRef } from 'react';
 
 const Layout = () => {
   const location = useLocation();

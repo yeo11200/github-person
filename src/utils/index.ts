@@ -73,7 +73,7 @@ export const getCurrentMonthCommits = (data: CommitData): number => {
   const currentDate = new Date();
   const currentMonth = `${currentDate.getFullYear()}-${String(
     currentDate.getMonth() + 1
-  ).padStart(2, "0")}`;
+  ).padStart(2, '0')}`;
 
   return data[currentMonth] || 0;
 };

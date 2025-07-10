@@ -1,11 +1,11 @@
-import React from "react";
-import { useHeader } from "../model/useHeader";
-import Logo from "./Logo";
-import HamburgerButton from "./HamburgerButton";
-import DesktopNavigation from "./DesktopNavigation";
-import MobileNavigation from "./MobileNavigation";
-import UserInfo from "./UserInfo";
-import styles from "../Header.module.scss";
+import React from 'react';
+import { useHeader } from '../model/useHeader';
+import Logo from './Logo';
+import HamburgerButton from './HamburgerButton';
+import DesktopNavigation from './DesktopNavigation';
+import MobileNavigation from './MobileNavigation';
+import UserInfo from './UserInfo';
+import styles from '../Header.module.scss';
 
 /**
  * 메인 Header 컴포넌트 (UI 조합 담당)

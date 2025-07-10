@@ -5,8 +5,8 @@ import {
   useEffect,
   useCallback,
   type ReactNode,
-} from "react";
-import fetchApi from "../utils/fetch-api";
+} from 'react';
+import fetchApi from '../utils/fetch-api';
 
 export interface User {
   id: string;
@@ -59,7 +59,7 @@ interface AuthProviderProps {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
@@ -73,18 +73,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const token = localStorage.getItem("github_token");
-        const savedUser = localStorage.getItem("github_user");
+        const token = localStorage.getItem('github_token');
+        const savedUser = localStorage.getItem('github_user');
 
         if (token && savedUser) {
           const userData = JSON.parse(savedUser);
           setUser(userData);
         }
       } catch (error) {
-        console.error("Error checking auth status:", error);
+        console.error('Error checking auth status:', error);
         // 에러 발생 시 로컬 스토리지 정리
-        localStorage.removeItem("github_token");
-        localStorage.removeItem("github_user");
+        localStorage.removeItem('github_token');
+        localStorage.removeItem('github_user');
       } finally {
         setIsLoading(false);
       }
@@ -98,12 +98,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
 
-      const data = await fetchApi<GitHubCallbackResponse>("/github/callback", {
-        method: "GET",
+      const data = await fetchApi<GitHubCallbackResponse>('/github/callback', {
+        method: 'GET',
         queryParams: { code },
       });
 
-      if (data.status === "success") {
+      if (data.status === 'success') {
         const { token, user: userData } = data.data;
 
         // 사용자 정보 구성
@@ -116,13 +116,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         };
 
         setUser(userInfo);
-        localStorage.setItem("github_token", token);
-        localStorage.setItem("github_user", JSON.stringify(userInfo));
+        localStorage.setItem('github_token', token);
+        localStorage.setItem('github_user', JSON.stringify(userInfo));
       } else {
-        throw new Error(data.message || "Login failed");
+        throw new Error(data.message || 'Login failed');
       }
     } catch (error) {
-      console.error("GitHub callback error:", error);
+      console.error('GitHub callback error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -135,18 +135,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsLoading(true);
 
       // GitHub 인증 URL 가져오기
-      const data = await fetchApi<GitHubAuthResponse>("/github/auth", {
-        method: "GET",
+      const data = await fetchApi<GitHubAuthResponse>('/github/auth', {
+        method: 'GET',
       });
 
-      if (data.status === "success") {
+      if (data.status === 'success') {
         // GitHub OAuth 페이지로 리다이렉트
         window.location.href = data.data.auth_url;
       } else {
-        throw new Error("Failed to initiate GitHub login");
+        throw new Error('Failed to initiate GitHub login');
       }
     } catch (error) {
-      console.error("GitHub login error:", error);
+      console.error('GitHub login error:', error);
       setIsLoading(false);
       throw error;
     }
@@ -154,11 +154,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // 로그아웃 함수
   const logout = () => {
-    window.location.href = "/";
+    window.location.href = '/';
 
     setUser(null);
-    localStorage.removeItem("github_token");
-    localStorage.removeItem("github_user");
+    localStorage.removeItem('github_token');
+    localStorage.removeItem('github_user');
   };
 
   const value: AuthContextType = {
