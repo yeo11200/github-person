@@ -1,0 +1,62 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Pre-push checks starting..."
+
+# 색상 정의
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# 결과 추적 변수
+LINT_PASSED=false
+TEST_PASSED=false
+
+echo -e "${BLUE}🔍 Lint check starting...${NC}"
+
+# Lint 실행
+if npm run lint; then
+    echo -e "${GREEN}✅ Lint check passed!${NC}"
+    LINT_PASSED=true
+else
+    echo -e "${RED}❌ Lint check failed!${NC}"
+    echo -e "${RED}CLI Lint 실패${NC}"
+    LINT_PASSED=false
+fi
+
+echo ""
+echo -e "${BLUE}🧪 Test check starting...${NC}"
+
+# Test 실행
+if npm test; then
+    echo -e "${GREEN}✅ Test check passed!${NC}"
+    TEST_PASSED=true
+else
+    echo -e "${RED}❌ Test check failed!${NC}"
+    echo -e "${RED}테스트코드 실패${NC}"
+    TEST_PASSED=false
+fi
+
+echo ""
+
+# 최종 결과 확인
+if [ "$LINT_PASSED" = true ] && [ "$TEST_PASSED" = true ]; then
+    echo -e "${GREEN}🎉 All checks passed! Push will proceed.${NC}"
+    exit 0
+else
+    echo -e "${RED}🚫 Push blocked due to failed checks:${NC}"
+    
+    if [ "$LINT_PASSED" = false ]; then
+        echo -e "${RED}  - Lint check failed${NC}"
+    fi
+    
+    if [ "$TEST_PASSED" = false ]; then
+        echo -e "${RED}  - Test check failed${NC}"
+    fi
+    
+    echo ""
+    echo -e "${YELLOW}💡 Fix the issues above and try pushing again.${NC}"
+    exit 1
+fi 
