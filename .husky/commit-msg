@@ -36,7 +36,7 @@ $DIFF_SUMMARY
 - test: 테스트 추가/수정
 - chore: 빌드 프로세스 또는 보조 도구 변경
 
-한 줄로 간결하게 작성해주세요." | gemini --temperature 0.3)
+한 줄로 간결하게 작성해주세요." | gemini -p "한 줄로 간결하게 작성해주세요.")
         
         if [ $? -eq 0 ] && [ -n "$NEW_COMMIT_MSG" ]; then
             echo "📋 생성된 커밋 메시지:"
