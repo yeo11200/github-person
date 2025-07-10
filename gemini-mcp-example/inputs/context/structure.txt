@@ -1,6 +1,5 @@
 === 프로젝트 전체 구조 ===
 .
-├── MCP_자동화_시스템_정리.md
 ├── README.md
 ├── eslint.config.js
 ├── gemini-mcp-example
@@ -9,8 +8,9 @@
 │   │   └── mcp.config.json
 │   ├── inputs
 │   │   ├── code
-│   │   │   ├── Header.tsx
-│   │   │   └── index.ts
+│   │   │   ├── DesktopNavigation.tsx
+│   │   │   ├── MobileNavigation.tsx
+│   │   │   └── UserInfo.tsx
 │   │   └── context
 │   │       └── structure.txt
 │   ├── outputs
@@ -74,8 +74,9 @@
 │   │   │   └── index.ts
 │   │   ├── Header
 │   │   │   ├── Header.module.scss
-│   │   │   ├── Header.tsx
-│   │   │   └── index.ts
+│   │   │   ├── index.ts
+│   │   │   ├── model
+│   │   │   └── ui
 │   │   ├── Layout
 │   │   │   ├── Layout.module.scss
 │   │   │   ├── Layout.tsx
@@ -140,12 +141,20 @@
 ├── vercel.json
 └── vite.config.ts
 
-40 directories, 100 files
+42 directories, 99 files
 
 === React 파일 목록 ===
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalBackdrop.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalBody.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalHeader.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/Modal.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalFooter.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Modal/Modal.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/DesktopNavigation.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/UserInfo.test.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/MobileNavigation.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/MobileNavigation.test.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/DesktopNavigation.test.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/UserInfo.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Logo.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Header.tsx
@@ -155,14 +164,6 @@
 ./src/main.tsx
 ./src/contexts/RepositoryContext.tsx
 ./src/contexts/AuthContext.tsx
-./src/components/MonthlyCommitChart/MonthlyCommitChart.tsx
-./src/components/CommitStatsPopup/CommitStatsPopup.tsx
-./src/components/Layout/Layout.tsx
-./src/components/Modal/Modal.tsx
-./src/components/Header/Header.tsx
-./src/pages/Home/Home.tsx
-./src/pages/RepoSelect/RepoSelect.tsx
-./src/pages/Dashboard/Dashboard.tsx
 
 === 패키지 정보 ===
     "dev": "vite",
