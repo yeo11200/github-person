@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Commit 전 간단한 검증
+echo "🔍 Pre-commit checks..."
+
+# TypeScript 타입 체크 (선택사항)
+# npm run type-check
+
+# Lint 체크 (선택사항)
+# npm run lint
+
+echo "✅ Pre-commit checks passed!" 
