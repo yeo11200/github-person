@@ -1,14 +1,14 @@
-import { create } from "zustand";
-import fetchApi from "../utils/fetch-api";
-import type { APIResponse, GitHubCommitStats } from "../types/apis";
-import { memoize } from "proxy-memoize"; // 경량 memo 라이브러리 추천
+import { create } from 'zustand';
+import fetchApi from '../utils/fetch-api';
+import type { APIResponse, GitHubCommitStats } from '../types/apis';
+import { memoize } from 'proxy-memoize'; // 경량 memo 라이브러리 추천
 import {
   getAverageCommits,
   getCurrentMonthCommits,
   getMaxCount,
   getMaxCountKey,
   getTotalCommits,
-} from "../utils";
+} from '../utils';
 
 export interface UseCommitStats {
   commitStats?: GitHubCommitStats;
@@ -25,8 +25,8 @@ export const selectMonthlyData = memoize((state: UseCommitStats) => {
     .map(([month, commits]) => ({ month, commits }))
     .sort(
       (a, b) =>
-        new Date(a.month + "-01").getTime() -
-        new Date(b.month + "-01").getTime()
+        new Date(a.month + '-01').getTime() -
+        new Date(b.month + '-01').getTime()
     );
 });
 
@@ -45,7 +45,7 @@ export const selectStats = memoize((state: UseCommitStats) => {
 });
 
 export const selectLanguage = memoize((state: UseCommitStats) => {
-  if (!state.commitStats?.languageStats) return "";
+  if (!state.commitStats?.languageStats) return '';
 
   const languageStats = state.commitStats.languageStats;
 
@@ -69,10 +69,10 @@ export const useCommitStats = create<UseCommitStats>((set, get) => ({
 
     try {
       const res = await fetchApi<APIResponse<GitHubCommitStats>>(
-        "/github/commits/stats"
+        '/github/commits/stats'
       );
 
-      if (res.status === "success") {
+      if (res.status === 'success') {
         set({
           commitStats: res.data,
         });

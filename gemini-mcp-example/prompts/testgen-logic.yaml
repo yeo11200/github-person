@@ -1,0 +1,474 @@
+id: testgen-logic
+model: gemini-pro
+temperature: 0.1
+input_vars: ["code", "structure"]
+prompt: |
+  시니어 로직 테스트 엔지니어로서 다음 코드에 대한 포괄적인 단위 테스트 코드를 작성하세요.
+
+  원본 코드:
+  ```typescript
+  {{code}}
+  ```
+
+  ## 🧪 로직 테스트 전문 원칙:
+
+  ### 1. 유틸리티 함수 테스트:
+  - ✅ 순수 함수 입력/출력 검증
+  - ✅ 다양한 데이터 타입 처리
+  - ✅ 엣지 케이스 및 경계값 테스트
+  - ✅ 에러 처리 및 예외 상황
+  - ✅ 성능 벤치마크 테스트
+
+  ### 2. API 서비스 테스트:
+  - ✅ HTTP 요청/응답 모킹
+  - ✅ 성공/실패 시나리오
+  - ✅ 재시도 로직 검증
+  - ✅ 타임아웃 및 취소 테스트
+  - ✅ 에러 처리 및 복구
+
+  ### 3. 상태 관리 테스트:
+  - ✅ 액션 디스패치 검증
+  - ✅ 상태 변화 추적
+  - ✅ 비동기 액션 테스트
+  - ✅ 셀렉터 함수 테스트
+  - ✅ 미들웨어 동작 검증
+
+  ### 4. 커스텀 훅 테스트:
+  - ✅ 훅 상태 변화 테스트
+  - ✅ 사이드 이펙트 검증
+  - ✅ 의존성 배열 테스트
+  - ✅ 정리 함수 동작 확인
+
+  ### 5. 비즈니스 로직 테스트:
+  - ✅ 복잡한 계산 로직 검증
+  - ✅ 조건부 로직 분기 테스트
+  - ✅ 데이터 변환 및 검증
+  - ✅ 알고리즘 정확성 확인
+
+  ## 🔧 로직 테스트 패턴:
+
+  ```typescript
+  import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+  import { renderHook, act } from '@testing-library/react-hooks';
+
+  // ✅ 유틸리티 함수 테스트 예시
+  describe('formatCurrency', () => {
+    it('정수를 올바르게 포맷한다', () => {
+      expect(formatCurrency(1000)).toBe('$1,000.00');
+      expect(formatCurrency(0)).toBe('$0.00');
+      expect(formatCurrency(-500)).toBe('-$500.00');
+    });
+
+    it('소수점을 올바르게 처리한다', () => {
+      expect(formatCurrency(1234.56)).toBe('$1,234.56');
+      expect(formatCurrency(1234.567)).toBe('$1,234.57'); // 반올림
+      expect(formatCurrency(1234.1)).toBe('$1,234.10');
+    });
+
+    it('다른 통화 코드를 지원한다', () => {
+      expect(formatCurrency(1000, 'EUR')).toBe('€1,000.00');
+      expect(formatCurrency(1000, 'JPY')).toBe('¥1,000');
+    });
+
+    it('잘못된 입력에 대해 에러를 던진다', () => {
+      expect(() => formatCurrency(NaN)).toThrow('Invalid number');
+      expect(() => formatCurrency(Infinity)).toThrow('Invalid number');
+      expect(() => formatCurrency('invalid' as any)).toThrow('Invalid number');
+    });
+
+    it('null/undefined를 적절히 처리한다', () => {
+      expect(formatCurrency(null as any)).toBe('$0.00');
+      expect(formatCurrency(undefined as any)).toBe('$0.00');
+    });
+
+    it('성능이 적절하다', () => {
+      const start = performance.now();
+      
+      for (let i = 0; i < 10000; i++) {
+        formatCurrency(Math.random() * 1000000);
+      }
+      
+      const end = performance.now();
+      expect(end - start).toBeLessThan(100); // 100ms 이내
+    });
+  });
+
+  // ✅ API 서비스 테스트 예시
+  describe('userApiService', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+      global.fetch = vi.fn();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    describe('getUsers', () => {
+      it('사용자 목록을 성공적으로 가져온다', async () => {
+        const mockUsers = [
+          { id: 1, name: 'John', email: 'john@example.com' },
+          { id: 2, name: 'Jane', email: 'jane@example.com' },
+        ];
+
+        vi.mocked(fetch).mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ data: mockUsers }),
+        } as Response);
+
+        const result = await userApiService.getUsers();
+
+        expect(result.success).toBe(true);
+        expect(result.data).toEqual(mockUsers);
+        expect(fetch).toHaveBeenCalledWith('/api/users', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+      });
+
+      it('네트워크 에러를 처리한다', async () => {
+        vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'));
+
+        const result = await userApiService.getUsers();
+
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('Network error');
+      });
+
+      it('HTTP 에러 상태를 처리한다', async () => {
+        vi.mocked(fetch).mockResolvedValueOnce({
+          ok: false,
+          status: 404,
+          statusText: 'Not Found',
+          json: () => Promise.resolve({ message: 'Users not found' }),
+        } as Response);
+
+        const result = await userApiService.getUsers();
+
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('404');
+      });
+
+      it('재시도 로직이 작동한다', async () => {
+        vi.mocked(fetch)
+          .mockRejectedValueOnce(new Error('Network error'))
+          .mockRejectedValueOnce(new Error('Network error'))
+          .mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({ data: [] }),
+          } as Response);
+
+        const result = await userApiService.getUsers({ retry: 3 });
+
+        expect(result.success).toBe(true);
+        expect(fetch).toHaveBeenCalledTimes(3);
+      });
+
+      it('타임아웃을 처리한다', async () => {
+        vi.mocked(fetch).mockImplementationOnce(
+          () => new Promise((resolve) => setTimeout(resolve, 6000))
+        );
+
+        const result = await userApiService.getUsers({ timeout: 5000 });
+
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('timeout');
+      });
+    });
+
+    describe('createUser', () => {
+      it('사용자를 성공적으로 생성한다', async () => {
+        const newUser = { name: 'New User', email: 'new@example.com' };
+        const createdUser = { id: 3, ...newUser };
+
+        vi.mocked(fetch).mockResolvedValueOnce({
+          ok: true,
+          status: 201,
+          json: () => Promise.resolve({ data: createdUser }),
+        } as Response);
+
+        const result = await userApiService.createUser(newUser);
+
+        expect(result.success).toBe(true);
+        expect(result.data).toEqual(createdUser);
+        expect(fetch).toHaveBeenCalledWith('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newUser),
+        });
+      });
+
+      it('유효성 검사 에러를 처리한다', async () => {
+        vi.mocked(fetch).mockResolvedValueOnce({
+          ok: false,
+          status: 400,
+          json: () => Promise.resolve({
+            message: 'Validation failed',
+            errors: { email: 'Invalid email format' },
+          }),
+        } as Response);
+
+        const result = await userApiService.createUser({
+          name: 'Test',
+          email: 'invalid-email',
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('Validation failed');
+        expect(result.validationErrors).toEqual({ email: 'Invalid email format' });
+      });
+    });
+  });
+
+  // ✅ 커스텀 훅 테스트 예시
+  describe('useCounter', () => {
+    it('초기값으로 시작한다', () => {
+      const { result } = renderHook(() => useCounter(5));
+      
+      expect(result.current.count).toBe(5);
+      expect(typeof result.current.increment).toBe('function');
+      expect(typeof result.current.decrement).toBe('function');
+      expect(typeof result.current.reset).toBe('function');
+    });
+
+    it('increment 함수가 카운트를 증가시킨다', () => {
+      const { result } = renderHook(() => useCounter(0));
+      
+      act(() => {
+        result.current.increment();
+      });
+      
+      expect(result.current.count).toBe(1);
+      
+      act(() => {
+        result.current.increment();
+      });
+      
+      expect(result.current.count).toBe(2);
+    });
+
+    it('decrement 함수가 카운트를 감소시킨다', () => {
+      const { result } = renderHook(() => useCounter(5));
+      
+      act(() => {
+        result.current.decrement();
+      });
+      
+      expect(result.current.count).toBe(4);
+    });
+
+    it('reset 함수가 초기값으로 되돌린다', () => {
+      const { result } = renderHook(() => useCounter(10));
+      
+      act(() => {
+        result.current.increment();
+        result.current.increment();
+      });
+      
+      expect(result.current.count).toBe(12);
+      
+      act(() => {
+        result.current.reset();
+      });
+      
+      expect(result.current.count).toBe(10);
+    });
+
+    it('최소값 제한이 작동한다', () => {
+      const { result } = renderHook(() => useCounter(0, { min: 0 }));
+      
+      act(() => {
+        result.current.decrement();
+      });
+      
+      expect(result.current.count).toBe(0); // 0 이하로 내려가지 않음
+    });
+
+    it('최대값 제한이 작동한다', () => {
+      const { result } = renderHook(() => useCounter(9, { max: 10 }));
+      
+      act(() => {
+        result.current.increment();
+        result.current.increment(); // 10을 초과하려고 시도
+      });
+      
+      expect(result.current.count).toBe(10); // 10을 초과하지 않음
+    });
+  });
+
+  // ✅ 상태 관리 테스트 예시 (Zustand)
+  describe('useUserStore', () => {
+    beforeEach(() => {
+      useUserStore.getState().reset();
+    });
+
+    it('초기 상태가 올바르다', () => {
+      const state = useUserStore.getState();
+      
+      expect(state.users).toEqual([]);
+      expect(state.loading).toBe(false);
+      expect(state.error).toBeNull();
+    });
+
+    it('addUser 액션이 사용자를 추가한다', () => {
+      const newUser = { id: 1, name: 'Test User', email: 'test@example.com' };
+      
+      act(() => {
+        useUserStore.getState().addUser(newUser);
+      });
+      
+      const state = useUserStore.getState();
+      expect(state.users).toHaveLength(1);
+      expect(state.users[0]).toEqual(newUser);
+    });
+
+    it('removeUser 액션이 사용자를 제거한다', () => {
+      const user1 = { id: 1, name: 'User 1', email: 'user1@example.com' };
+      const user2 = { id: 2, name: 'User 2', email: 'user2@example.com' };
+      
+      act(() => {
+        useUserStore.getState().addUser(user1);
+        useUserStore.getState().addUser(user2);
+      });
+      
+      expect(useUserStore.getState().users).toHaveLength(2);
+      
+      act(() => {
+        useUserStore.getState().removeUser(1);
+      });
+      
+      const state = useUserStore.getState();
+      expect(state.users).toHaveLength(1);
+      expect(state.users[0].id).toBe(2);
+    });
+
+    it('fetchUsers 액션이 비동기로 사용자를 가져온다', async () => {
+      const mockUsers = [{ id: 1, name: 'Fetched User', email: 'fetched@example.com' }];
+      
+      // API 모킹
+      vi.mocked(userApi.getUsers).mockResolvedValueOnce({
+        success: true,
+        data: mockUsers,
+      });
+      
+      await act(async () => {
+        await useUserStore.getState().fetchUsers();
+      });
+      
+      const state = useUserStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.users).toEqual(mockUsers);
+      expect(state.error).toBeNull();
+    });
+
+    it('fetchUsers 실패 시 에러 상태를 설정한다', async () => {
+      const errorMessage = 'Failed to fetch users';
+      
+      vi.mocked(userApi.getUsers).mockResolvedValueOnce({
+        success: false,
+        error: errorMessage,
+      });
+      
+      await act(async () => {
+        await useUserStore.getState().fetchUsers();
+      });
+      
+      const state = useUserStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe(errorMessage);
+      expect(state.users).toEqual([]);
+    });
+  });
+
+  // ✅ 복잡한 비즈니스 로직 테스트
+  describe('calculateTotalPrice', () => {
+    const baseItems = [
+      { id: 1, price: 100, quantity: 2 }, // 200
+      { id: 2, price: 50, quantity: 1 },  // 50
+      { id: 3, price: 75, quantity: 3 },  // 225
+    ]; // 총합: 475
+
+    it('기본 가격 계산이 정확하다', () => {
+      const result = calculateTotalPrice(baseItems);
+      
+      expect(result.subtotal).toBe(475);
+      expect(result.tax).toBe(47.5); // 10% 세금
+      expect(result.total).toBe(522.5);
+    });
+
+    it('할인이 올바르게 적용된다', () => {
+      const discount = { type: 'percentage', value: 20 }; // 20% 할인
+      const result = calculateTotalPrice(baseItems, { discount });
+      
+      expect(result.subtotal).toBe(475);
+      expect(result.discount).toBe(95); // 20% of 475
+      expect(result.discountedSubtotal).toBe(380);
+      expect(result.tax).toBe(38); // 10% of 380
+      expect(result.total).toBe(418);
+    });
+
+    it('고정 할인이 올바르게 적용된다', () => {
+      const discount = { type: 'fixed', value: 50 };
+      const result = calculateTotalPrice(baseItems, { discount });
+      
+      expect(result.discount).toBe(50);
+      expect(result.discountedSubtotal).toBe(425);
+      expect(result.total).toBe(467.5);
+    });
+
+    it('배송비가 올바르게 추가된다', () => {
+      const shipping = { cost: 25, freeThreshold: 500 };
+      const result = calculateTotalPrice(baseItems, { shipping });
+      
+      expect(result.shipping).toBe(25);
+      expect(result.total).toBe(547.5);
+    });
+
+    it('무료 배송 임계값이 작동한다', () => {
+      const shipping = { cost: 25, freeThreshold: 400 };
+      const result = calculateTotalPrice(baseItems, { shipping });
+      
+      expect(result.shipping).toBe(0); // 475 > 400이므로 무료 배송
+      expect(result.total).toBe(522.5);
+    });
+
+    it('빈 배열을 처리한다', () => {
+      const result = calculateTotalPrice([]);
+      
+      expect(result.subtotal).toBe(0);
+      expect(result.tax).toBe(0);
+      expect(result.total).toBe(0);
+    });
+
+    it('잘못된 입력을 처리한다', () => {
+      expect(() => calculateTotalPrice(null as any)).toThrow('Items must be an array');
+      expect(() => calculateTotalPrice([{ price: -10, quantity: 1 }] as any)).toThrow('Invalid price');
+      expect(() => calculateTotalPrice([{ price: 10, quantity: -1 }] as any)).toThrow('Invalid quantity');
+    });
+  });
+  ```
+
+  ## 📋 출력 형식:
+
+  ---
+  ## 📄 파일: `원본파일명.test.ts`
+  ```typescript
+  [포괄적인 로직 테스트 코드]
+  [단위 테스트, 통합 테스트, 성능 테스트 포함]
+  [실용적이고 유지보수 가능한 테스트]
+  [Mock과 테스트 유틸리티 적절히 활용]
+  ```
+
+  ---
+
+  **중요 규칙:**
+  - 설명 없이 실행 가능한 테스트 코드만 출력
+  - Vitest 프레임워크 사용
+  - 모든 테스트 케이스에 명확한 설명 추가
+  - 에지 케이스와 에러 시나리오 충분히 커버
+  - 실제 버그를 찾을 수 있는 의미있는 테스트 작성
+  - 성능 테스트 반드시 포함
+  - Mock과 스파이 적절히 활용
+
+  지금 바로 위 형식으로 로직 테스트 코드를 출력하세요:

@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import styles from "./Home.module.scss";
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import styles from './Home.module.scss';
 
 const Home = () => {
   const { isAuthenticated, loginWithGitHub } = useAuth();

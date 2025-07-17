@@ -1,0 +1,136 @@
+id: refactor-apis
+model: gemini-pro
+temperature: 0.1
+input_vars: ["code", "structure"]
+prompt: |
+  시니어 백엔드 아키텍트로서 다음 API 관련 코드를 확장성, 안정성, 성능에 중점을 두고 리팩토링하세요.
+
+  원본 코드:
+  ```typescript
+  {{code}}
+  ```
+
+  프로젝트 구조:
+  ```
+  {{structure}}
+  ```
+
+  ## 📁 Import 경로 규칙:
+  - ✅ **절대경로 우선**: tsconfig에 `@/*` 또는 절대경로 설정이 있으면 반드시 절대경로 사용
+  - ✅ **일관성 유지**: 기존 코드의 import 패턴 분석 후 동일한 방식 적용
+  - ✅ **예시**: `import { ApiResponse } from '@/types/api'` (절대경로 설정시)
+  - ✅ **예시**: `import { CONFIG } from '@/config/api'` (절대경로 설정시)
+
+  ## 🔌 API 리팩토링 핵심 원칙:
+
+  ### 1. 강력한 에러 처리:
+  - ✅ HTTP 상태 코드별 세분화된 에러 처리
+  - ✅ 네트워크 에러, 타임아웃, 파싱 에러 구분
+  - ✅ 재시도 로직 구현 (지수 백오프)
+  - ✅ 사용자 친화적 에러 메시지 제공
+
+  ### 2. 타입 안전성 강화:
+  - ✅ 요청/응답 타입 엄격히 정의
+  - ✅ 런타임 응답 검증 (Zod, Yup 등)
+  - ✅ 제네릭을 활용한 재사용 가능한 API 클라이언트
+  - ✅ 에러 타입 명시적 정의
+
+  ### 3. 성능 최적화:
+  - ✅ 요청 캐싱 전략 구현
+  - ✅ 요청 중복 제거 (Request Deduplication)
+  - ✅ 응답 압축 활용
+  - ✅ 적절한 타임아웃 설정
+
+  ### 4. 보안 강화:
+  - ✅ 인증 토큰 자동 관리
+  - ✅ CSRF 보호 구현
+  - ✅ 민감한 데이터 로깅 방지
+  - ✅ Rate Limiting 대응
+
+  ### 5. 확장성 및 유지보수성:
+  - ✅ 인터셉터 패턴으로 공통 로직 분리
+  - ✅ 환경별 설정 관리
+  - ✅ API 버전 관리 지원
+  - ✅ 모니터링 및 로깅 통합
+
+  ## 🔧 구체적인 개선 패턴:
+
+  ```typescript
+  // ✅ 절대경로 사용 (tsconfig 설정시)
+  import { ApiResponse, ApiError } from '@/types/api';
+  import { Logger } from '@/utils/logger';
+  import { CONFIG } from '@/config/api';
+  import { TokenManager } from '@/services/auth';
+
+  // ✅ API 응답 타입
+  interface ApiResponse<T> {
+    data: T;
+    status: number;
+    message?: string;
+    timestamp: string;
+  }
+
+  // ✅ 에러 타입 정의
+  class ApiError extends Error {
+    constructor(
+      message: string,
+      public status: number,
+      public code?: string
+    ) {
+      super(message);
+      this.name = 'ApiError';
+    }
+  }
+
+  // ✅ 재시도 로직
+  const withRetry = async <T>(
+    fn: () => Promise<T>,
+    maxRetries = 3,
+    baseDelay = 1000
+  ): Promise<T> => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) throw error;
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error('Max retries exceeded');
+  };
+
+  // ✅ 요청 중복 제거
+  const requestCache = new Map<string, Promise<any>>();
+  const dedupedRequest = <T>(key: string, requestFn: () => Promise<T>): Promise<T> => {
+    if (requestCache.has(key)) {
+      return requestCache.get(key)!;
+    }
+    const promise = requestFn().finally(() => requestCache.delete(key));
+    requestCache.set(key, promise);
+    return promise;
+  };
+  ```
+
+  ## 📋 출력 형식:
+
+  ---
+  ## 📄 파일: `개선된_파일명.ts`
+  ```typescript
+  [리팩토링된 API 코드]
+  [절대경로 우선 사용, 에러 처리, 타입 안전성, 성능 최적화 적용]
+  [인터셉터, 캐싱, 재시도 로직 포함]
+  [JSDoc 문서화 포함]
+  ```
+
+  ---
+
+  **중요 규칙:**
+  - 설명 없이 실행 가능한 코드만 출력
+  - 모든 API 함수에 JSDoc 문서화 추가
+  - 에러 처리를 최우선으로 고려
+  - 실제 프로덕션 환경에서 사용 가능한 수준
+  - 성능과 보안을 동시에 고려
+  - **절대경로 설정이 있으면 반드시 절대경로 사용**
+
+  지금 바로 위 형식으로 리팩토링된 코드를 출력하세요:

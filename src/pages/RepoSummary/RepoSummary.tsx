@@ -1,34 +1,34 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
-import styles from "./RepoSummary.module.scss";
-import fetchApi from "../../utils/fetch-api";
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import styles from './RepoSummary.module.scss';
+import fetchApi from '../../utils/fetch-api';
 import type {
   GitHubBranchResponse,
   GitHubRepository,
   SummaryData,
-} from "../../types/apis";
-import type { APIResponse } from "../../types/apis";
-type SummaryType = "resume" | "retrospective" | "portfolio" | "documentation";
+} from '../../types/apis';
+import type { APIResponse } from '../../types/apis';
+type SummaryType = 'resume' | 'retrospective' | 'portfolio' | 'documentation';
 
 // 로딩 메시지 배열 (재미있는 요소)
 const LOADING_MESSAGES = [
-  { text: "코드를 분석하고 있어요... 🔍", duration: 3000 },
-  { text: "커밋 히스토리를 읽고 있어요... 📚", duration: 4000 },
-  { text: "기술 스택을 파악하고 있어요... 🛠️", duration: 3000 },
-  { text: "프로젝트 구조를 이해하고 있어요... 🏗️", duration: 4000 },
-  { text: "최고의 요약을 작성하고 있어요... ✨", duration: 3000 },
-  { text: "마지막 검토 중이에요... 🎯", duration: 3000 },
+  { text: '코드를 분석하고 있어요... 🔍', duration: 3000 },
+  { text: '커밋 히스토리를 읽고 있어요... 📚', duration: 4000 },
+  { text: '기술 스택을 파악하고 있어요... 🛠️', duration: 3000 },
+  { text: '프로젝트 구조를 이해하고 있어요... 🏗️', duration: 4000 },
+  { text: '최고의 요약을 작성하고 있어요... ✨', duration: 3000 },
+  { text: '마지막 검토 중이에요... 🎯', duration: 3000 },
 ];
 
 const RepoSummary = () => {
   const { repoId, owner } = useParams<{ repoId: string; owner: string }>();
   const [repository, setRepository] = useState<GitHubRepository | null>(null);
   const [branches, setBranches] = useState<string[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [branchesLoading, setBranchesLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<SummaryType>("resume");
+  const [activeTab, setActiveTab] = useState<SummaryType>('resume');
   const [summaryContent, setSummaryContent] = useState<SummaryData>();
   const [generatingType, setGeneratingType] = useState<SummaryType | null>(
     null
@@ -42,7 +42,7 @@ const RepoSummary = () => {
 
   // 상수를 컴포넌트 외부로 이동하여 안정적인 참조 생성
   const TABS_CONFIG = useMemo(() => {
-    return [{ id: "resume" as SummaryType, label: "이력서용", icon: "📄" }];
+    return [{ id: 'resume' as SummaryType, label: '이력서용', icon: '📄' }];
   }, []);
 
   // 로딩 애니메이션 효과
@@ -54,7 +54,7 @@ const RepoSummary = () => {
       setRemainingTime(30); // 30초로 초기화
 
       const progressInterval = setInterval(() => {
-        setLoadingProgress((prev) => {
+        setLoadingProgress(prev => {
           if (prev >= 95) return prev; // 95%에서 멈춤 (완료되면 100%로)
           return prev + Math.random() * 2 + 0.5; // 랜덤하게 증가
         });
@@ -132,7 +132,7 @@ const RepoSummary = () => {
 
       // 기본 브랜치 설정 (main, master 순으로 확인)
       const defaultBranch = branchData.find(
-        (branch: string) => branch === "main" || branch === "master"
+        (branch: string) => branch === 'main' || branch === 'master'
       );
 
       if (defaultBranch) {
@@ -141,7 +141,7 @@ const RepoSummary = () => {
         setSelectedBranch(branchData[0]);
       }
     } catch (error) {
-      console.error("Failed to fetch repository or branches:", error);
+      console.error('Failed to fetch repository or branches:', error);
     } finally {
       setLoading(false);
       setBranchesLoading(false);
@@ -161,7 +161,7 @@ const RepoSummary = () => {
       );
       setSummaryContent(summeryGetResponse.data);
     } catch (error) {
-      console.error("Failed to fetch summary data:", error);
+      console.error('Failed to fetch summary data:', error);
       setSummaryContent(undefined);
     }
   }, [owner, repoId, selectedBranch]);
@@ -176,19 +176,19 @@ const RepoSummary = () => {
         // 실제 AI 요약 API 호출
         const summaryResponse = await fetchApi<APIResponse<string>>(
           `/github/repos/${owner}/${repoId}/summary?branch=${selectedBranch}`,
-          { method: "POST" }
+          { method: 'POST' }
         );
 
-        if (summaryResponse.status === "success") {
+        if (summaryResponse.status === 'success') {
           // 완료 시 프로그레스를 100%로 설정
           setLoadingProgress(100);
-          await new Promise((resolve) => setTimeout(resolve, 500)); // 완료 애니메이션을 위한 잠시 대기
+          await new Promise(resolve => setTimeout(resolve, 500)); // 완료 애니메이션을 위한 잠시 대기
           await summaryGetData();
         }
 
         setGeneratingType(null);
       } catch (error) {
-        console.error("Failed to generate summary:", error);
+        console.error('Failed to generate summary:', error);
         setGeneratingType(null);
       }
     },
@@ -204,7 +204,7 @@ const RepoSummary = () => {
           (lang: { language: string; percentage: number }) =>
             `${lang.language} (${lang.percentage}%)`
         )
-        .join(", ");
+        .join(', ');
 
       return `# ${repo.name} - 이력서용 요약
 
@@ -214,27 +214,27 @@ ${data.project_intro}
 ## 🛠 주요 기술 스택
 - **언어**: ${topLanguages}
 ${
-  data.tech_stack.backend.join(", ") &&
-  `- **백엔드**: ${data.tech_stack.backend.join(", ")}`
+  data.tech_stack.backend.join(', ') &&
+  `- **백엔드**: ${data.tech_stack.backend.join(', ')}`
 }
 ${
-  data.tech_stack.database.join(", ") &&
-  `- **데이터베이스**: ${data.tech_stack.database.join(", ")}`
+  data.tech_stack.database.join(', ') &&
+  `- **데이터베이스**: ${data.tech_stack.database.join(', ')}`
 }
 ${
-  data.tech_stack.testing.join(", ") &&
-  `- **테스팅**: ${data.tech_stack.testing.join(", ")}`
+  data.tech_stack.testing.join(', ') &&
+  `- **테스팅**: ${data.tech_stack.testing.join(', ')}`
 }
 ${
-  data.tech_stack.frontend.join(", ") &&
-  `- **프론트앤드**: ${data.tech_stack.frontend.join(", ")}`
+  data.tech_stack.frontend.join(', ') &&
+  `- **프론트앤드**: ${data.tech_stack.frontend.join(', ')}`
 }
 ${
   data.tech_stack.other &&
   data.tech_stack.other.length > 0 &&
   `- **추가**:\n${data.tech_stack.other
-    .map((item: string) => `  - ${item.replace(/^-\s*/, "").trim()}`)
-    .join("\n")}`
+    .map((item: string) => `  - ${item.replace(/^-\s*/, '').trim()}`)
+    .join('\n')}`
 }
 
 
@@ -248,8 +248,8 @@ ${data.resume_bullets
   .map((bullet: string) => {
     try {
       const parsed = JSON.parse(bullet);
-      const title = parsed.title.replace(/^:+|:+$/g, "").trim();
-      const content = parsed.content.replace(/^:+|:+$/g, "").trim();
+      const title = parsed.title.replace(/^:+|:+$/g, '').trim();
+      const content = parsed.content.replace(/^:+|:+$/g, '').trim();
 
       // title과 content가 같으면 하나만 표시
       if (title === content) {
@@ -267,29 +267,27 @@ ${data.resume_bullets
       return `- ${bullet}`;
     }
   })
-  .join("\n")}
+  .join('\n')}
 
 ## 🔧 기술적 도전과 해결
 ${(() => {
   // refactoring_history 텍스트를 일관된 Markdown 리스트로 포맷팅
   const formatRefactoringHistory = (text: string) => {
     // 먼저 모든 "- " 패턴을 찾아서 배열로 분리
-    const items = text
-      .split(/\s*-\s+/)
-      .filter((item) => item.trim().length > 0);
+    const items = text.split(/\s*-\s+/).filter(item => item.trim().length > 0);
 
     return items
-      .map((item) => {
+      .map(item => {
         // 각 아이템을 정리하고 "- "를 앞에 붙임
         const cleanItem = item
           .trim()
-          .replace(/^-+\s*/, "") // 앞의 불필요한 대시 제거
-          .replace(/\s+/g, " ") // 여러 공백을 하나로 통일
+          .replace(/^-+\s*/, '') // 앞의 불필요한 대시 제거
+          .replace(/\s+/g, ' ') // 여러 공백을 하나로 통일
           .trim();
 
         return `- ${cleanItem}`;
       })
-      .join("\n");
+      .join('\n');
   };
 
   return formatRefactoringHistory(data.refactoring_history);
@@ -305,19 +303,19 @@ ${(() => {
   const isValidUpdated = !isNaN(updatedDate.getTime());
 
   if (!isValidCreated && !isValidUpdated) {
-    return "날짜 정보를 확인할 수 없습니다.";
+    return '날짜 정보를 확인할 수 없습니다.';
   }
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
-  const createdStr = isValidCreated ? formatDate(createdDate) : "알 수 없음";
-  const updatedStr = isValidUpdated ? formatDate(updatedDate) : "알 수 없음";
+  const createdStr = isValidCreated ? formatDate(createdDate) : '알 수 없음';
+  const updatedStr = isValidUpdated ? formatDate(updatedDate) : '알 수 없음';
 
   // 프로젝트 진행 기간 계산
   if (isValidCreated && isValidUpdated) {
@@ -340,15 +338,15 @@ ${(() => {
   // 클립보드 복사 함수를 useCallback으로 메모이제이션
   const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
-    alert("클립보드에 복사되었습니다!");
+    alert('클립보드에 복사되었습니다!');
   }, []);
 
   // 다운로드 함수를 useCallback으로 메모이제이션
   const downloadAsMarkdown = useCallback(
     (content: string, filename: string) => {
-      const blob = new Blob([content], { type: "text/markdown" });
+      const blob = new Blob([content], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = `${filename}-${selectedBranch}.md`;
       document.body.appendChild(a);
@@ -372,20 +370,20 @@ ${(() => {
 
   // 현재 선택된 탭에 따른 요약 내용 생성을 useMemo로 메모이제이션
   const getCurrentSummary = useMemo(() => {
-    if (!summaryContent || !repository) return "";
+    if (!summaryContent || !repository) return '';
 
     switch (activeTab) {
-      case "resume":
+      case 'resume':
         return generateResumeSummary(summaryContent, repository);
 
       default:
-        return "";
+        return '';
     }
   }, [summaryContent, repository, activeTab, generateResumeSummary]);
 
   const goToGithubRepo = useCallback(() => {
     if (!repository) return;
-    window.open(`${repository.html_url}/tree/${selectedBranch}`, "_blank");
+    window.open(`${repository.html_url}/tree/${selectedBranch}`, '_blank');
   }, [repository, selectedBranch]);
 
   if (loading) {
@@ -425,7 +423,7 @@ ${(() => {
               {repository.name}
             </h1>
             <p className={styles.repoDescription}>
-              {repository.description || "설명이 없습니다."}
+              {repository.description || '설명이 없습니다.'}
             </p>
             <div className={styles.repoMeta}>
               <span className={styles.language}>{repository.language}</span>
@@ -442,13 +440,13 @@ ${(() => {
             <select
               className={styles.branchSelect}
               value={selectedBranch}
-              onChange={(e) => handleBranchChange(e.target.value)}
+              onChange={e => handleBranchChange(e.target.value)}
               disabled={branchesLoading}
             >
               {branchesLoading ? (
                 <option>브랜치 로딩 중...</option>
               ) : (
-                branches.map((branch) => (
+                branches.map(branch => (
                   <option key={branch} value={branch}>
                     {branch}
                   </option>
@@ -459,11 +457,11 @@ ${(() => {
         </header>
 
         <div className={styles.tabs}>
-          {TABS_CONFIG.map((tab) => (
+          {TABS_CONFIG.map(tab => (
             <button
               key={tab.id}
               className={`${styles.tab} ${
-                activeTab === tab.id ? styles.tabActive : ""
+                activeTab === tab.id ? styles.tabActive : ''
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
@@ -476,7 +474,7 @@ ${(() => {
         <div className={styles.content}>
           <div className={styles.contentHeader}>
             <h2 className={styles.contentTitle}>
-              {TABS_CONFIG.find((tab) => tab.id === activeTab)?.label} 요약
+              {TABS_CONFIG.find(tab => tab.id === activeTab)?.label} 요약
               <span className={styles.branchBadge}>({selectedBranch})</span>
             </h2>
             <div className={styles.contentActions}>
@@ -486,7 +484,7 @@ ${(() => {
                   onClick={() => generateSummary(activeTab)}
                   disabled={generatingType === activeTab}
                 >
-                  {generatingType === activeTab ? "생성 중..." : "요약 생성"}
+                  {generatingType === activeTab ? '생성 중...' : '요약 생성'}
                 </button>
               )}
               {currentSummary && (
@@ -555,7 +553,7 @@ ${(() => {
                           예상 소요 시간: 최대 30초 ⏰
                           {remainingTime > 0
                             ? ` (약 ${remainingTime}초 남음)`
-                            : " (곧 완료됩니다!)"}
+                            : ' (곧 완료됩니다!)'}
                         </span>
                       )}
                     </div>

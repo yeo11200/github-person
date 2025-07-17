@@ -1,0 +1,63 @@
+id: migration_script
+model: gemini-pro
+temperature: 0.1
+input_vars: ["structure", "analysis"]
+prompt: |
+  You are a React migration specialist. Based on the structure analysis, create a complete executable shell script to migrate the project to the recommended structure.
+
+  ## Current Project Structure:
+  ```
+  {{structure}}
+  ```
+
+  ## Structure Analysis Results:
+  ```
+  {{analysis}}
+  ```
+
+  ## 🎯 Migration Script Requirements:
+
+  ### 1. Project Backup
+  - Create timestamped backup of current project
+  - Backup critical files (package.json, tsconfig.json, etc.)
+
+  ### 2. Directory Structure Creation
+  - Create new optimal directory structure
+  - Ensure proper permissions and ownership
+
+  ### 3. File Migration
+  - Move existing files to new locations
+  - Handle file conflicts safely
+  - Preserve file permissions and timestamps
+
+  ### 4. Import Path Updates
+  - Update all import statements to match new structure
+  - Handle both relative and absolute imports
+  - Update barrel exports (index.ts files)
+
+  ### 5. Configuration Updates
+  - Update tsconfig.json paths if needed
+  - Update package.json scripts if needed
+  - Update any build configuration
+
+  ### 6. Validation
+  - Verify all files moved correctly
+  - Check for broken imports
+  - Validate project still builds
+
+  ## 📝 Output Requirements:
+
+  **중요: 실행 가능한 완전한 bash 스크립트만 출력해주세요.**
+
+  Generate ONLY a complete bash script that:
+  - Has proper error handling (set -e)
+  - Creates backups before making changes
+  - Moves files safely with conflict resolution
+  - Updates import paths using sed/awk
+  - Creates necessary index.ts barrel exports
+  - Validates the migration success
+  - Provides rollback capability if needed
+
+  The script should be production-ready and handle edge cases gracefully.
+
+  **스크립트만 출력하고 다른 설명은 포함하지 마세요. 바로 실행할 수 있는 완전한 .sh 파일 내용만 제공해주세요.**

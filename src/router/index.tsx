@@ -1,16 +1,16 @@
-import { createBrowserRouter } from "react-router-dom";
-import Layout from "../components/Layout";
-import NotFound from "../pages/NotFound";
-import Home from "../pages/Home/Home";
-import Dashboard from "../pages/Dashboard/Dashboard";
-import RepoSelect from "../pages/RepoSelect/RepoSelect";
-import RepoSummary from "../pages/RepoSummary/RepoSummary";
-import Callback from "../pages/Callback";
+import { createBrowserRouter } from 'react-router-dom';
+import Layout from '../components/Layout';
+import NotFound from '../pages/NotFound';
+import Home from '../pages/Home/Home';
+import Dashboard from '../pages/Dashboard/Dashboard';
+import RepoSelect from '../pages/RepoSelect/RepoSelect';
+import RepoSummary from '../pages/RepoSummary/RepoSummary';
+import Callback from '../pages/Callback';
 
 // GitHub 레포지토리 요약 서비스 라우터
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <Layout />,
     children: [
       {
@@ -18,25 +18,25 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "dashboard",
+        path: 'dashboard',
         element: <Dashboard />,
       },
       {
-        path: "repositories",
+        path: 'repositories',
         element: <RepoSelect />,
       },
       {
-        path: "repositories/:owner/:repoId/summary",
+        path: 'repositories/:owner/:repoId/summary',
         element: <RepoSummary />,
       },
     ],
   },
   {
-    path: "/callback",
+    path: '/callback',
     element: <Callback />,
   },
   {
-    path: "*",
+    path: '*',
     element: <NotFound />,
   },
 ]);

@@ -1,0 +1,184 @@
+=== 프로젝트 전체 구조 ===
+.
+├── README.md
+├── eslint.config.js
+├── gemini-mcp-example
+│   ├── README.md
+│   ├── config
+│   │   └── mcp.config.json
+│   ├── inputs
+│   │   ├── code
+│   │   │   └── Header.tsx
+│   │   └── context
+│   │       └── structure.txt
+│   ├── outputs
+│   │   ├── advice
+│   │   │   └── structure.advice.md
+│   │   ├── backups
+│   │   ├── migration
+│   │   ├── performance
+│   │   │   ├── Button.performance.md
+│   │   │   ├── CommitStatsPopup.performance.md
+│   │   │   ├── Header.performance.md
+│   │   │   ├── Layout.performance.md
+│   │   │   └── Modal.performance.md
+│   │   ├── refactored
+│   │   │   ├── Header_refactored_structure.md
+│   │   │   ├── local-storage_utils_refactored.md
+│   │   │   ├── local-storage_zustand_refactored.md
+│   │   │   └── src
+│   │   ├── structure
+│   │   │   └── analysis.md
+│   │   └── tests
+│   ├── prompts
+│   │   ├── folder_analysis.yaml
+│   │   ├── migration.yaml
+│   │   ├── performance.yaml
+│   │   ├── refactor-apis.yaml
+│   │   ├── refactor-store-rtk.yaml
+│   │   ├── refactor-store-zustand.yaml
+│   │   ├── refactor-store.yaml
+│   │   ├── refactor-utils.yaml
+│   │   ├── refactor.yaml
+│   │   ├── testgen-component.yaml
+│   │   ├── testgen-logic.yaml
+│   │   └── testgen.yaml
+│   └── temp
+│       ├── refactor_output.md
+│       ├── refactor_prompt.txt
+│       ├── testgen_output.md
+│       └── testgen_prompt.txt
+├── index.html
+├── mcp-auto-run.sh
+├── package.json
+├── pnpm-lock.yaml
+├── public
+│   └── vite.svg
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── apis
+│   │   ├── index.ts
+│   │   └── resume-api.ts
+│   ├── assets
+│   │   ├── favicon.png
+│   │   ├── logo.png
+│   │   └── react.svg
+│   ├── components
+│   │   ├── CommitStatsPopup
+│   │   │   ├── CommitStatsPopup.module.scss
+│   │   │   ├── index.ts
+│   │   │   ├── model
+│   │   │   └── ui
+│   │   ├── Header
+│   │   │   ├── Header.module.scss
+│   │   │   ├── index.ts
+│   │   │   ├── model
+│   │   │   └── ui
+│   │   ├── Layout
+│   │   │   ├── Layout.module.scss
+│   │   │   ├── Layout.tsx
+│   │   │   └── index.ts
+│   │   ├── Modal
+│   │   │   ├── Modal.module.scss
+│   │   │   └── Modal.tsx
+│   │   └── MonthlyCommitChart
+│   │       ├── MonthlyCommitChart.module.scss
+│   │       ├── MonthlyCommitChart.tsx
+│   │       └── index.ts
+│   ├── contexts
+│   │   ├── AuthContext.tsx
+│   │   └── RepositoryContext.tsx
+│   ├── index.css
+│   ├── main.tsx
+│   ├── pages
+│   │   ├── Callback
+│   │   │   ├── Callback.module.scss
+│   │   │   ├── Callback.tsx
+│   │   │   └── index.ts
+│   │   ├── Dashboard
+│   │   │   ├── Dashboard.module.scss
+│   │   │   ├── Dashboard.tsx
+│   │   │   └── index.ts
+│   │   ├── Home
+│   │   │   ├── Home.module.scss
+│   │   │   ├── Home.tsx
+│   │   │   └── index.ts
+│   │   ├── NotFound.tsx
+│   │   ├── RepoSelect
+│   │   │   ├── RepoSelect.module.scss
+│   │   │   ├── RepoSelect.tsx
+│   │   │   └── index.ts
+│   │   └── RepoSummary
+│   │       ├── RepoSummary.module.scss
+│   │       ├── RepoSummary.tsx
+│   │       └── index.ts
+│   ├── router
+│   │   └── index.tsx
+│   ├── store
+│   │   ├── useCommitStats.tsx
+│   │   └── useMyAgent.tsx
+│   ├── styles
+│   │   ├── NotFound.scss
+│   │   └── Profile.scss
+│   ├── test
+│   │   └── setup.ts
+│   ├── types
+│   │   └── apis
+│   │       ├── github-commit.ts
+│   │       ├── github-my.ts
+│   │       ├── github-repo.ts
+│   │       ├── github-resume.ts
+│   │       └── index.ts
+│   ├── utils
+│   │   ├── fetch-api.ts
+│   │   ├── index.ts
+│   │   └── local-storage.ts
+│   └── vite-env.d.ts
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vercel.json
+└── vite.config.ts
+
+45 directories, 96 files
+
+=== React 파일 목록 ===
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalBackdrop.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalBody.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalHeader.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/Modal.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalFooter.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Modal/Modal.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/DesktopNavigation.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/UserInfo.test.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/MobileNavigation.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/MobileNavigation.test.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Header.test.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/DesktopNavigation.test.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/UserInfo.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Logo.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Header.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/HamburgerButton.tsx
+./gemini-mcp-example/outputs/refactored/src/store/useMyAgent.tsx
+./node_modules/.pnpm/@testing-library+react-hooks@8.0.1_@types+react@19.1.6_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/@testing-library/react-hooks/src/__tests__/useContext.test.tsx
+./node_modules/.pnpm/@testing-library+react-hooks@8.0.1_@types+react@19.1.6_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/@testing-library/react-hooks/src/helpers/createTestHarness.tsx
+./src/App.tsx
+
+=== 패키지 정보 ===
+    "test:coverage": "vitest --coverage",
+    "test:watch": "vitest --watch",
+    "husky": "husky install",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.0",
+    "dayjs": "^1.11.13",
+    "proxy-memoize": "^3.0.1",
+    "react": "^19.1.0",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.6.1",
+    "zustand": "^5.0.5"

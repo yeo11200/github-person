@@ -1,12 +1,12 @@
-import React from "react";
-import styles from "./Modal.module.scss";
+import React from 'react';
+import styles from './Modal.module.scss';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   message: string;
-  type: "alert" | "confirm";
+  type: 'alert' | 'confirm';
   onConfirm?: () => void;
   confirmText?: string;
   cancelText?: string;
@@ -19,8 +19,8 @@ const Modal: React.FC<ModalProps> = ({
   message,
   type,
   onConfirm,
-  confirmText = "확인",
-  cancelText = "취소",
+  confirmText = '확인',
+  cancelText = '취소',
 }) => {
   if (!isOpen) return null;
 
@@ -49,7 +49,7 @@ const Modal: React.FC<ModalProps> = ({
         </div>
 
         <div className={styles.modalFooter}>
-          {type === "confirm" && (
+          {type === 'confirm' && (
             <button
               className={`${styles.modalBtn} ${styles.cancelBtn}`}
               onClick={onClose}

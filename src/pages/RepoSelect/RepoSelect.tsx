@@ -1,17 +1,17 @@
-import React, { useState, useMemo, useCallback } from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import React, { useState, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   useRepository,
   type Repository,
-} from "../../contexts/RepositoryContext";
-import styles from "./RepoSelect.module.scss";
+} from '../../contexts/RepositoryContext';
+import styles from './RepoSelect.module.scss';
 
 const RepoSelect = () => {
   const { isAuthenticated } = useAuth();
   const { repositories, loading, error, refreshRepositories } = useRepository();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<"name" | "updated" | "stars">("updated");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'updated' | 'stars'>('updated');
 
   // 검색 입력 핸들러
   const handleSearchChange = useCallback(
@@ -24,7 +24,7 @@ const RepoSelect = () => {
   // 정렬 변경 핸들러
   const handleSortChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSortBy(e.target.value as "name" | "updated" | "stars");
+      setSortBy(e.target.value as 'name' | 'updated' | 'stars');
     },
     []
   );
@@ -33,17 +33,17 @@ const RepoSelect = () => {
   const filteredAndSortedRepos = useMemo(() => {
     return repositories
       .filter(
-        (repo) =>
+        repo =>
           repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           repo.description?.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
         switch (sortBy) {
-          case "name":
+          case 'name':
             return a.name.localeCompare(b.name);
-          case "stars":
+          case 'stars':
             return b.stargazers_count - a.stargazers_count;
-          case "updated":
+          case 'updated':
           default:
             return (
               new Date(b.updated_at).getTime() -
@@ -136,7 +136,7 @@ const RepoSelect = () => {
         </div>
 
         <div className={styles.repoGrid}>
-          {filteredAndSortedRepos.map((repo) => (
+          {filteredAndSortedRepos.map(repo => (
             <RepoCard key={repo.id} repo={repo} />
           ))}
         </div>
@@ -172,7 +172,7 @@ const RepoCard = React.memo(({ repo }: { repo: Repository }) => {
       </div>
 
       <p className={styles.repoCardDescription}>
-        {repo.description || "설명이 없습니다."}
+        {repo.description || '설명이 없습니다.'}
       </p>
 
       <div className={styles.repoCardStats}>
@@ -183,7 +183,7 @@ const RepoCard = React.memo(({ repo }: { repo: Repository }) => {
         <div className={styles.stat}>
           <span className={styles.statIcon}>📅</span>
           <span className={styles.statValue}>
-            {new Date(repo.updated_at).toLocaleDateString("ko-KR")}
+            {new Date(repo.updated_at).toLocaleDateString('ko-KR')}
           </span>
         </div>
       </div>
@@ -202,6 +202,6 @@ const RepoCard = React.memo(({ repo }: { repo: Repository }) => {
   );
 });
 
-RepoCard.displayName = "RepoCard";
+RepoCard.displayName = 'RepoCard';
 
 export default RepoSelect;

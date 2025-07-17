@@ -1,0 +1,337 @@
+  시니어 React 테스트 엔지니어로서 다음 React 컴포넌트에 대한 포괄적인 테스트 코드를 작성하세요.
+
+  원본 컴포넌트:
+  ```typescript
+export { default } from './ui/CommitStatsPopup';
+export * from './ui/CommitStatsPopup';
+  ```
+
+  ## 🧪 React 컴포넌트 테스트 전문 원칙:
+
+  ### 1. 렌더링 테스트:
+  - ✅ 기본 props로 정상 렌더링
+  - ✅ 다양한 props 조합 테스트
+  - ✅ 조건부 렌더링 로직 검증
+  - ✅ 에러 상태 및 폴백 UI
+  - ✅ 로딩 상태 표시
+
+  ### 2. 사용자 상호작용 테스트:
+  - ✅ 클릭, 입력, 키보드 이벤트
+  - ✅ 폼 제출 및 유효성 검사
+  - ✅ 드래그 앤 드롭, 터치 이벤트
+  - ✅ 호버, 포커스 상태 변화
+  - ✅ 모달, 드롭다운 등 UI 상호작용
+
+  ### 3. 성능 테스트:
+  - ✅ React.memo 최적화 검증
+  - ✅ useCallback, useMemo 효과 확인
+  - ✅ 불필요한 리렌더링 방지 테스트
+  - ✅ 컴포넌트 마운트/언마운트 성능
+  - ✅ 대용량 데이터 렌더링 성능
+
+  ### 4. 접근성 테스트:
+  - ✅ 키보드 네비게이션 지원
+  - ✅ 스크린 리더 호환성
+  - ✅ ARIA 속성 및 역할 검증
+  - ✅ 색상 대비 및 시각적 접근성
+  - ✅ 포커스 관리 및 순서
+
+  ### 5. 상태 관리 테스트:
+  - ✅ 로컬 상태 변화 테스트
+  - ✅ Context 사용 컴포넌트 테스트
+  - ✅ 상태 업데이트 시 UI 반영
+  - ✅ 비동기 상태 처리
+
+  ## 🔧 React 컴포넌트 테스트 패턴:
+
+  ```typescript
+  import React from 'react';
+  import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+  import userEvent from '@testing-library/user-event';
+  import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+  import { ThemeProvider } from 'styled-components';
+  import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+  // ✅ 테스트 유틸리티
+  const createTestQueryClient = () => new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  const renderWithProviders = (
+    ui: React.ReactElement,
+    {
+      queryClient = createTestQueryClient(),
+      theme = defaultTheme,
+      ...renderOptions
+    } = {}
+  ) => {
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+
+    return {
+      ...render(ui, { wrapper: Wrapper, ...renderOptions }),
+      queryClient,
+    };
+  };
+
+  // ✅ Mock 데이터 팩토리
+  const createMockProps = (overrides = {}) => ({
+    title: 'Test Component',
+    loading: false,
+    error: null,
+    onSubmit: vi.fn(),
+    onCancel: vi.fn(),
+    ...overrides,
+  });
+
+  describe('ComponentName', () => {
+    let mockProps: ReturnType<typeof createMockProps>;
+
+    beforeEach(() => {
+      mockProps = createMockProps();
+      vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+      vi.resetAllMocks();
+    });
+
+    describe('렌더링', () => {
+      it('기본 props로 정상 렌더링된다', () => {
+        renderWithProviders(<ComponentName {...mockProps} />);
+        
+        expect(screen.getByText('Test Component')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
+      });
+
+      it('로딩 상태일 때 스피너를 표시한다', () => {
+        renderWithProviders(<ComponentName {...mockProps} loading />);
+        
+        expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /submit/i })).not.toBeInTheDocument();
+      });
+
+      it('에러 상태일 때 에러 메시지를 표시한다', () => {
+        const errorMessage = 'Something went wrong';
+        renderWithProviders(<ComponentName {...mockProps} error={errorMessage} />);
+        
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+        expect(screen.getByRole('alert')).toBeInTheDocument();
+      });
+
+      it('조건부 렌더링이 올바르게 작동한다', () => {
+        const { rerender } = renderWithProviders(<ComponentName {...mockProps} showAdvanced={false} />);
+        
+        expect(screen.queryByTestId('advanced-options')).not.toBeInTheDocument();
+        
+        rerender(<ComponentName {...mockProps} showAdvanced />);
+        expect(screen.getByTestId('advanced-options')).toBeInTheDocument();
+      });
+    });
+
+    describe('사용자 상호작용', () => {
+      it('버튼 클릭 시 onSubmit이 호출된다', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<ComponentName {...mockProps} />);
+        
+        await user.click(screen.getByRole('button', { name: /submit/i }));
+        
+        expect(mockProps.onSubmit).toHaveBeenCalledTimes(1);
+      });
+
+      it('입력 필드에 텍스트를 입력할 수 있다', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<ComponentName {...mockProps} />);
+        
+        const input = screen.getByLabelText(/name/i);
+        await user.type(input, 'Test User');
+        
+        expect(input).toHaveValue('Test User');
+      });
+
+      it('폼 제출 시 입력된 데이터가 전달된다', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<ComponentName {...mockProps} />);
+        
+        await user.type(screen.getByLabelText(/name/i), 'Test User');
+        await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+        await user.click(screen.getByRole('button', { name: /submit/i }));
+        
+        expect(mockProps.onSubmit).toHaveBeenCalledWith({
+          name: 'Test User',
+          email: 'test@example.com',
+        });
+      });
+
+      it('ESC 키로 취소할 수 있다', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<ComponentName {...mockProps} />);
+        
+        await user.keyboard('{Escape}');
+        
+        expect(mockProps.onCancel).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('성능', () => {
+      it('동일한 props로 리렌더링되지 않는다', () => {
+        const renderSpy = vi.fn();
+        const MemoizedComponent = React.memo(() => {
+          renderSpy();
+          return <ComponentName {...mockProps} />;
+        });
+
+        const { rerender } = renderWithProviders(<MemoizedComponent />);
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        rerender(<MemoizedComponent />);
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('props가 변경될 때만 리렌더링된다', () => {
+        const renderSpy = vi.fn();
+        const TestComponent = ({ title }: { title: string }) => {
+          renderSpy();
+          return <ComponentName {...mockProps} title={title} />;
+        };
+
+        const { rerender } = renderWithProviders(<TestComponent title="Title 1" />);
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        rerender(<TestComponent title="Title 1" />);
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        rerender(<TestComponent title="Title 2" />);
+        expect(renderSpy).toHaveBeenCalledTimes(2);
+      });
+
+      it('대용량 리스트 렌더링 성능이 적절하다', () => {
+        const largeDataSet = Array.from({ length: 1000 }, (_, i) => ({
+          id: i,
+          name: `Item ${i}`,
+        }));
+
+        const start = performance.now();
+        renderWithProviders(<ComponentName {...mockProps} items={largeDataSet} />);
+        const end = performance.now();
+
+        expect(end - start).toBeLessThan(100); // 100ms 이내
+      });
+    });
+
+    describe('접근성', () => {
+      it('키보드 네비게이션이 작동한다', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<ComponentName {...mockProps} />);
+        
+        await user.tab();
+        expect(screen.getByRole('button', { name: /submit/i })).toHaveFocus();
+        
+        await user.tab();
+        expect(screen.getByLabelText(/name/i)).toHaveFocus();
+      });
+
+      it('적절한 ARIA 속성을 가진다', () => {
+        renderWithProviders(<ComponentName {...mockProps} />);
+        
+        const button = screen.getByRole('button', { name: /submit/i });
+        expect(button).toHaveAttribute('aria-label');
+        
+        const form = screen.getByRole('form');
+        expect(form).toHaveAttribute('aria-describedby');
+      });
+
+      it('스크린 리더용 텍스트가 제공된다', () => {
+        renderWithProviders(<ComponentName {...mockProps} loading />);
+        
+        expect(screen.getByText(/loading/i)).toHaveClass('sr-only');
+      });
+
+      it('에러 상태가 스크린 리더에게 알려진다', () => {
+        const errorMessage = 'Validation error';
+        renderWithProviders(<ComponentName {...mockProps} error={errorMessage} />);
+        
+        const errorElement = screen.getByRole('alert');
+        expect(errorElement).toHaveTextContent(errorMessage);
+        expect(errorElement).toHaveAttribute('aria-live', 'polite');
+      });
+    });
+
+    describe('통합 테스트', () => {
+      it('전체 사용자 플로우가 작동한다', async () => {
+        const user = userEvent.setup();
+        const onSubmitMock = vi.fn().mockResolvedValue({ success: true });
+        
+        renderWithProviders(<ComponentName {...mockProps} onSubmit={onSubmitMock} />);
+        
+        // 폼 작성
+        await user.type(screen.getByLabelText(/name/i), 'John Doe');
+        await user.type(screen.getByLabelText(/email/i), 'john@example.com');
+        
+        // 제출
+        await user.click(screen.getByRole('button', { name: /submit/i }));
+        
+        // 로딩 상태 확인
+        expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+        
+        // 성공 상태 대기
+        await waitFor(() => {
+          expect(screen.getByText(/success/i)).toBeInTheDocument();
+        });
+        
+        expect(onSubmitMock).toHaveBeenCalledWith({
+          name: 'John Doe',
+          email: 'john@example.com',
+        });
+      });
+
+      it('에러 상황을 올바르게 처리한다', async () => {
+        const user = userEvent.setup();
+        const onSubmitMock = vi.fn().mockRejectedValue(new Error('Network error'));
+        
+        renderWithProviders(<ComponentName {...mockProps} onSubmit={onSubmitMock} />);
+        
+        await user.type(screen.getByLabelText(/name/i), 'John Doe');
+        await user.click(screen.getByRole('button', { name: /submit/i }));
+        
+        await waitFor(() => {
+          expect(screen.getByText(/network error/i)).toBeInTheDocument();
+        });
+        
+        expect(screen.getByRole('alert')).toBeInTheDocument();
+      });
+    });
+  });
+  ```
+
+  ## 📋 출력 형식:
+
+  ---
+  ## 📄 파일: `컴포넌트명.test.tsx`
+  ```typescript
+  [포괄적인 React 컴포넌트 테스트 코드]
+  [렌더링, 상호작용, 성능, 접근성 테스트 포함]
+  [실용적이고 유지보수 가능한 테스트]
+  [커스텀 렌더 함수 및 테스트 유틸리티 포함]
+  ```
+
+  ---
+
+  **중요 규칙:**
+  - 설명 없이 실행 가능한 테스트 코드만 출력
+  - React Testing Library + Vitest 사용
+  - 모든 테스트 케이스에 명확한 설명 추가
+  - 성능과 접근성 테스트 반드시 포함
+  - 실제 사용자 시나리오 기반 테스트 작성
+  - Mock과 테스트 유틸리티 적절히 활용
+  - 에지 케이스와 에러 시나리오 충분히 커버
+
+  지금 바로 위 형식으로 React 컴포넌트 테스트 코드를 출력하세요:

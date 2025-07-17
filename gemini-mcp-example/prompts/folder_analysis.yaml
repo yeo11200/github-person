@@ -1,0 +1,78 @@
+id: folder_analysis
+model: gemini-pro
+temperature: 0.4
+input_vars: ["structure"]
+prompt: |
+  You are a senior software architect specializing in React applications. Analyze the following project folder structure and provide architectural recommendations.
+
+  ## Project Structure:
+  ```
+  {{structure}}
+  ```
+
+  ## Analysis Areas:
+
+  ### 1. Current Structure Assessment
+  - Evaluate the current folder organization
+  - Identify strengths and weaknesses
+  - Check for proper separation of concerns
+  - Assess scalability and maintainability
+
+  ### 2. React Best Practices Compliance
+  - Component organization and hierarchy
+  - Custom hooks placement
+  - Utility functions organization
+  - Type definitions structure
+  - Asset management
+
+  ### 3. Performance Considerations
+  - Code splitting opportunities
+  - Lazy loading implementation
+  - Bundle optimization potential
+  - Static asset organization
+
+  ### 4. Developer Experience
+  - Import path complexity
+  - File discoverability
+  - Naming conventions consistency
+  - Documentation structure
+
+  ## Recommendations:
+
+  ### 1. Structural Improvements
+  Provide specific folder structure recommendations with:
+  - Detailed directory layout
+  - File naming conventions
+  - Import/export patterns
+  - Barrel exports usage
+
+  ### 2. Migration Strategy
+  - Step-by-step migration plan
+  - Risk assessment for changes
+  - Backward compatibility considerations
+  - Team coordination requirements
+
+  ### 3. Tooling Suggestions
+  - Path mapping configurations
+  - Linting rules for imports
+  - Build optimization settings
+  - Development workflow improvements
+
+  ## Output Format:
+  ```markdown
+  # Project Structure Analysis
+
+  ## Current State
+  [Analysis of current structure]
+
+  ## Recommended Structure
+  [Improved folder structure]
+
+  ## Migration Plan
+  [Step-by-step implementation]
+
+  ## Benefits
+  [Expected improvements]
+  ```
+
+  Focus on React-specific architectural patterns and modern frontend development practices.

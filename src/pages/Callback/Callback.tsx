@@ -1,16 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import styles from "./Callback.module.scss";
+import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import styles from './Callback.module.scss';
 
 const Callback: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { handleGitHubCallback } = useAuth();
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
   );
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const processedRef = useRef(false); // 처리 완료 여부를 추적
 
   useEffect(() => {
@@ -23,39 +23,39 @@ const Callback: React.FC = () => {
       try {
         processedRef.current = true; // 처리 시작 표시
 
-        const code = searchParams.get("code");
-        const error = searchParams.get("error");
-        const errorDescription = searchParams.get("error_description");
+        const code = searchParams.get('code');
+        const error = searchParams.get('error');
+        const errorDescription = searchParams.get('error_description');
 
         // OAuth 에러 처리
         if (error) {
-          setStatus("error");
+          setStatus('error');
           setErrorMessage(errorDescription || `OAuth Error: ${error}`);
           return;
         }
 
         // 인증 코드가 없는 경우
         if (!code) {
-          setStatus("error");
-          setErrorMessage("인증 코드를 받지 못했습니다.");
+          setStatus('error');
+          setErrorMessage('인증 코드를 받지 못했습니다.');
           return;
         }
 
         // GitHub 콜백 처리
         await handleGitHubCallback(code);
-        setStatus("success");
+        setStatus('success');
 
         // 성공 시 대시보드로 리다이렉트 (2초 후)
         setTimeout(() => {
-          navigate("/dashboard", { replace: true });
+          navigate('/dashboard', { replace: true });
         }, 2000);
       } catch (error) {
-        console.error("Callback processing error:", error);
-        setStatus("error");
+        console.error('Callback processing error:', error);
+        setStatus('error');
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : "로그인 처리 중 오류가 발생했습니다."
+            : '로그인 처리 중 오류가 발생했습니다.'
         );
       }
     };
@@ -64,12 +64,12 @@ const Callback: React.FC = () => {
   }, []); // 의존성 배열을 비워서 한 번만 실행
 
   const handleRetry = () => {
-    navigate("/", { replace: true });
+    navigate('/', { replace: true });
   };
 
   const renderContent = () => {
     switch (status) {
-      case "loading":
+      case 'loading':
         return (
           <div className={styles.callback__content}>
             <div className={styles.callback__spinner}>
@@ -82,7 +82,7 @@ const Callback: React.FC = () => {
           </div>
         );
 
-      case "success":
+      case 'success':
         return (
           <div className={styles.callback__content}>
             <div className={styles.callback__icon}>
@@ -95,7 +95,7 @@ const Callback: React.FC = () => {
           </div>
         );
 
-      case "error":
+      case 'error':
         return (
           <div className={styles.callback__content}>
             <div className={styles.callback__icon}>

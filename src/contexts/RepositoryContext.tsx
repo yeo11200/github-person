@@ -4,16 +4,16 @@ import React, {
   useState,
   useEffect,
   useCallback,
-} from "react";
-import type { ReactNode } from "react";
-import fetchApi from "../utils/fetch-api";
-import { useAuth } from "./AuthContext";
+} from 'react';
+import type { ReactNode } from 'react';
+import fetchApi from '../utils/fetch-api';
+import { useAuth } from './AuthContext';
 import type {
   GitHubReposResponse,
   Repository,
-} from "../types/apis/github-repo";
-import { useMyAgent } from "../store/useMyAgent";
-import { useCommitStats } from "../store/useCommitStats";
+} from '../types/apis/github-repo';
+import { useMyAgent } from '../store/useMyAgent';
+import { useCommitStats } from '../store/useCommitStats';
 
 interface RepositoryContextType {
   repositories: Repository[];
@@ -36,12 +36,12 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
   children,
 }) => {
   const { isAuthenticated } = useAuth();
-  const fetchMyData = useMyAgent((state) => state.fetchMyData);
-  const fetctCommitStats = useCommitStats((state) => state.fetctCommitStats);
+  const fetchMyData = useMyAgent(state => state.fetchMyData);
+  const fetctCommitStats = useCommitStats(state => state.fetctCommitStats);
 
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
 
   // 레포지토리 가져오기
   const fetchRepositories = useCallback(async () => {
@@ -56,24 +56,24 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
 
     try {
       setLoading(true);
-      setError("");
+      setError('');
 
-      const response = await fetchApi<GitHubReposResponse>("/github/repos", {
-        method: "GET",
+      const response = await fetchApi<GitHubReposResponse>('/github/repos', {
+        method: 'GET',
       });
 
-      if (response.status === "success") {
+      if (response.status === 'success') {
         setRepositories(response.data);
       } else {
-        setError(response.message || "레포지토리를 불러오는데 실패했습니다.");
+        setError(response.message || '레포지토리를 불러오는데 실패했습니다.');
         setRepositories([]);
       }
     } catch (error) {
-      console.error("Failed to fetch repositories:", error);
+      console.error('Failed to fetch repositories:', error);
       setError(
         error instanceof Error
           ? error.message
-          : "레포지토리를 불러오는데 실패했습니다."
+          : '레포지토리를 불러오는데 실패했습니다.'
       );
       setRepositories([]);
     } finally {
@@ -92,7 +92,7 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
       fetchRepositories();
     } else {
       setRepositories([]);
-      setError("");
+      setError('');
     }
   }, [isAuthenticated, fetchRepositories]);
 
@@ -116,7 +116,7 @@ export const RepositoryProvider: React.FC<RepositoryProviderProps> = ({
 export const useRepository = (): RepositoryContextType => {
   const context = useContext(RepositoryContext);
   if (context === undefined) {
-    throw new Error("useRepository must be used within a RepositoryProvider");
+    throw new Error('useRepository must be used within a RepositoryProvider');
   }
   return context;
 };

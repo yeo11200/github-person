@@ -1,0 +1,68 @@
+id: performance_analysis
+model: gemini-pro
+temperature: 0.2
+input_vars: ["code", "structure"]
+prompt: |
+  You are an expert React performance optimizer. Analyze the provided React code for potential performance bottlenecks related to unnecessary rerendering.
+
+  ## Code to Analyze:
+  ```tsx
+  {{code}}
+  ```
+
+  ## Project Structure Context:
+  ```
+  {{structure}}
+  ```
+
+  ## Analysis Requirements:
+
+  Please provide a comprehensive analysis covering:
+
+  ### 1. Component-Level Rerendering
+  - Identify components that may rerender unnecessarily
+  - Check for state changes high in the component tree affecting unrelated children
+  - Analyze prop dependencies and their impact on child components
+
+  ### 2. Prop Instability Issues
+  - **Inline Objects/Arrays**: Look for object or array literals passed as props (e.g., `style={{ color: 'red' }}`)
+  - **Inline Functions**: Identify functions defined inline within props (e.g., `onClick={() => handleClick()}`)
+  - Explain how these create new references on every render, breaking memoization
+
+  ### 3. Memoization Opportunities
+  - Suggest where `React.memo` could prevent unnecessary rerenders
+  - Identify places where `useCallback` and `useMemo` would be beneficial
+  - Analyze dependency arrays for existing hooks
+
+  ### 4. Context Usage Analysis
+  - If Context is used, check for overly broad context causing widespread rerenders
+  - Suggest context splitting or alternative state management approaches
+
+  ## Output Format:
+
+  For each issue found, provide:
+
+  **Problem Description:** Clear statement of the performance issue
+
+  **Code Example:** Show the problematic code snippet with line references
+
+  **Explanation:** Explain why this causes unnecessary rerenders, mentioning object/function identity
+
+  **Solution:** Provide concrete code examples showing how to fix the issue
+
+  **Performance Impact:** Estimate the severity (High/Medium/Low)
+
+  ## Example Analysis:
+
+  ### 🚨 Problem: Inline Object in Props
+  **Code:** `<ChildComponent style={{ color: 'blue' }} />`
+  **Issue:** Creates new object reference on every render
+  **Solution:** 
+  ```tsx
+  const childStyle = { color: 'blue' };
+  // or
+  const childStyle = useMemo(() => ({ color: 'blue' }), []);
+  ```
+  **Impact:** Medium - Causes child component to rerender unnecessarily
+
+  Please analyze the provided code and give specific, actionable recommendations for performance optimization.
