@@ -1,4 +1,3 @@
-import React from 'react';
 import { useHeader } from '../model/useHeader';
 import Logo from './Logo';
 import HamburgerButton from './HamburgerButton';
