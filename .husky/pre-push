@@ -14,6 +14,7 @@ NC='\033[0m' # No Color
 LINT_PASSED=false
 FORMAT_PASSED=false
 TEST_PASSED=false
+CODE_CONVENTION_PASSED=false
 
 echo -e "${BLUE}🔍 Lint check starting...${NC}"
 
@@ -55,9 +56,73 @@ else
 fi
 
 echo ""
+echo -e "${BLUE}🤖 AI 코드 컨벤션 검사 시작...${NC}"
+
+# 변경된 파일들의 diff 가져오기
+CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep "^src/")
+if [ -n "$CHANGED_FILES" ]; then
+    # 변경된 파일들의 diff 내용 가져오기
+    DIFF_CONTENT=$(git diff --cached --unified=0)
+    
+    # AI로 코드 컨벤션 검사
+    CODE_CONVENTION_CHECK=$(echo "다음 코드 변경사항이 React/TypeScript 컨벤션을 따르는지 검사해주세요.
+
+변경된 파일들:
+$CHANGED_FILES
+
+변경 내용:
+$DIFF_CONTENT
+
+검사 기준:
+1. 컴포넌트는 함수형으로 작성되었는가?
+2. 적절한 TypeScript 타입을 사용했는가?
+3. React Hooks 규칙을 준수했는가?
+4. 불필요한 리렌더링을 방지하는 최적화가 적용되었는가?
+5. 의미있는 변수명과 함수명을 사용했는가?
+6. 적절한 에러 처리가 되어 있는가?
+7. 접근성(accessibility)을 고려했는가?
+
+문제가 있으면 'FAIL'로 시작하고, 구체적인 파일명과 라인, 문제점을 설명해주세요.
+문제가 없으면 'PASS'로 시작하고, '코드 컨벤션 준수'라고 답해주세요." | gemini -p "코드 컨벤션 검사 결과만 간단히 답해주세요.")
+
+    if echo "$CODE_CONVENTION_CHECK" | grep -q "^PASS"; then
+        echo -e "${GREEN}✅ 코드 컨벤션 검사 통과!${NC}"
+        CODE_CONVENTION_PASSED=true
+    else
+        echo -e "${RED}❌ 코드 컨벤션 검사 실패!${NC}"
+        echo -e "${YELLOW}문제점:${NC}"
+        echo "$CODE_CONVENTION_CHECK" | sed 's/^FAIL//'
+        
+        # AI가 개선 제안
+        echo ""
+        echo -e "${BLUE}🤖 AI가 코드 개선 방안을 제안합니다...${NC}"
+        
+        IMPROVEMENT_SUGGESTION=$(echo "다음 코드 변경사항에 대한 개선 방안을 제안해주세요.
+
+변경된 파일들:
+$CHANGED_FILES
+
+변경 내용:
+$DIFF_CONTENT
+
+개선 방안을 간단하고 구체적으로 제안해주세요." | gemini -p "코드 개선 방안만 간단히 제안해주세요.")
+        
+        if [ $? -eq 0 ] && [ -n "$IMPROVEMENT_SUGGESTION" ]; then
+            echo -e "${GREEN}💡 개선 제안:${NC}"
+            echo "$IMPROVEMENT_SUGGESTION"
+        fi
+        
+        CODE_CONVENTION_PASSED=false
+    fi
+else
+    echo -e "${YELLOW}⚠️  src 폴더에 변경된 파일이 없어 코드 컨벤션 검사를 건너뜁니다.${NC}"
+    CODE_CONVENTION_PASSED=true
+fi
+
+echo ""
 
 # 최종 결과 확인
-if [ "$LINT_PASSED" = true ] && [ "$FORMAT_PASSED" = true ] && [ "$TEST_PASSED" = true ]; then
+if [ "$LINT_PASSED" = true ] && [ "$FORMAT_PASSED" = true ] && [ "$TEST_PASSED" = true ] && [ "$CODE_CONVENTION_PASSED" = true ]; then
     echo -e "${GREEN}🎉 All checks passed! Push will proceed.${NC}"
     exit 0
 else
@@ -73,6 +138,10 @@ else
     
     if [ "$TEST_PASSED" = false ]; then
         echo -e "${RED}  - Test check failed${NC}"
+    fi
+    
+    if [ "$CODE_CONVENTION_PASSED" = false ]; then
+        echo -e "${RED}  - Code convention check failed${NC}"
     fi
     
     echo ""

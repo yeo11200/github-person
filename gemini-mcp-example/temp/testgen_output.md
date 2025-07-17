@@ -1,264 +1,220 @@
 ---
-## 📄 파일: `Header.test.tsx`
+## 📄 파일: `src/components/CommitStatsPopup/CommitStatsPopup.test.tsx`
 ```typescript
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import Header from './Header';
-import { useHeader } from '../model/useHeader';
+import CommitStatsPopup from './ui/CommitStatsPopup';
+import type { CommitStatsPopupProps } from './ui/CommitStatsPopup';
+import type { ChartData, ChartOptions } from 'chart.js';
 
-// -----------------------------------------------------------------------------
-// Mocks
-// -----------------------------------------------------------------------------
-
-// 1. useHeader 커스텀 훅 Mock
-vi.mock('../model/useHeader');
-
-// 2. 자식 컴포넌트 Mock
-vi.mock('./Logo', () => ({
-  default: ({ onClick }: { onClick: () => void }) => (
-    <div data-testid="logo" onClick={onClick}>Logo</div>
-  ),
-}));
-vi.mock('./HamburgerButton', () => ({
-  default: ({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) => (
-    <button data-testid="hamburger-button" onClick={onClick}>
-      {isOpen ? 'Close' : 'Open'}
-    </button>
-  ),
-}));
-vi.mock('./DesktopNavigation', () => ({
-  default: ({ isAuthenticated, onLogin, onLogout }: { isAuthenticated: boolean; onLogin: () => void; onLogout: () => void; }) => (
-    <div data-testid="desktop-nav">
-      Desktop Nav: {isAuthenticated ? 'Logged In' : 'Logged Out'}
-      <button onClick={onLogin}>Login</button>
-      <button onClick={onLogout}>Logout</button>
+// react-chartjs-2 모의 처리
+vi.mock('react-chartjs-2', () => ({
+  Bar: (props: { 'data-testid': string }) => (
+    <div data-testid={props['data-testid'] || 'mock-bar-chart'}>
+      {/* 실제 차트 대신 간단한 div를 렌더링합니다. */}
     </div>
   ),
 }));
-vi.mock('./MobileNavigation', () => ({
-  default: ({ isOpen }: { isOpen: boolean }) => (
-    <div data-testid="mobile-nav" style={{ display: isOpen ? 'block' : 'none' }}>
-      Mobile Nav
-    </div>
-  ),
-}));
-vi.mock('./UserInfo', () => ({
-  default: ({ user }: { user: { name: string } }) => (
-    <div data-testid="user-info">User: {user.name}</div>
-  ),
-}));
 
-// -----------------------------------------------------------------------------
-// Test Suite
-// -----------------------------------------------------------------------------
+// useCommitStatsPopup 훅의 내부 구현(body 스크롤 제어)을 테스트하기 위한 헬퍼
+const getBodyScrollStyle = () => document.body.style.overflow;
 
-describe('Header 컴포넌트', () => {
-  const mockToggleMobileMenu = vi.fn();
-  const mockCloseMobileMenu = vi.fn();
-  const mockHandleLogin = vi.fn();
-  const mockHandleLogout = vi.fn();
-  const mockUser = { name: 'Test User', avatar_url: 'http://example.com/avatar.png' };
+// 테스트용 Mock 데이터 팩토리
+const createMockProps = (
+  overrides: Partial<CommitStatsPopupProps> = {}
+): CommitStatsPopupProps => ({
+  isOpen: true,
+  onClose: vi.fn(),
+  stats: {
+    total: 1500,
+    average: 125,
+    max: 300,
+    thisMonth: 80,
+  },
+  chartData: {
+    labels: ['2023-01', '2023-02', '2023-03'],
+    datasets: [
+      {
+        label: '월별 커밋 수',
+        data: [100, 200, 300],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+    ],
+  } as ChartData<'bar'>,
+  chartOptions: {
+    responsive: true,
+    maintainAspectRatio: false,
+  } as ChartOptions<'bar'>,
+  ...overrides,
+});
 
-  const mockUseHeader = useHeader as vi.Mock;
+describe('CommitStatsPopup', () => {
+  let mockProps: CommitStatsPopupProps;
 
   beforeEach(() => {
-    // 각 테스트 전에 기본 Mock 상태 설정
-    mockUseHeader.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isMobileMenuOpen: false,
-      toggleMobileMenu: mockToggleMobileMenu,
-      closeMobileMenu: mockCloseMobileMenu,
-      handleLogin: mockHandleLogin,
-      handleLogout: mockHandleLogout,
-    });
+    mockProps = createMockProps();
+    // body 스타일 초기화
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.overflow = '';
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  // ---------------------------------------------------------------------------
-  // 1. 렌더링 테스트
-  // ---------------------------------------------------------------------------
   describe('렌더링', () => {
-    it('인증되지 않은 상태에서 기본 UI가 올바르게 렌더링된다', () => {
-      render(<Header />);
-      
-      expect(screen.getByTestId('logo')).toBeInTheDocument();
-      expect(screen.getByTestId('hamburger-button')).toBeInTheDocument();
-      expect(screen.getByTestId('desktop-nav')).toHaveTextContent('Logged Out');
-      expect(screen.getByTestId('mobile-nav')).not.toBeVisible();
-      expect(screen.queryByTestId('user-info')).not.toBeInTheDocument();
+    it('isOpen이 true일 때 기본 props로 정상 렌더링된다', () => {
+      render(<CommitStatsPopup {...mockProps} />);
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByText('월별 커밋 통계')).toBeInTheDocument();
+      expect(screen.getByText('총 커밋')).toBeInTheDocument();
+      expect(screen.getByText('1500')).toBeInTheDocument();
+      expect(screen.getByText('월평균')).toBeInTheDocument();
+      expect(screen.getByText('125')).toBeInTheDocument();
+      expect(screen.getByText('최고 기록')).toBeInTheDocument();
+      expect(screen.getByText('300')).toBeInTheDocument();
+      expect(screen.getByText('이번 달')).toBeInTheDocument();
+      expect(screen.getByText('80')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-bar-chart')).toBeInTheDocument();
     });
 
-    it('인증된 상태에서 사용자 정보와 함께 UI가 올바르게 렌더링된다', () => {
-      mockUseHeader.mockReturnValue({
-        user: mockUser,
-        isAuthenticated: true,
-        isMobileMenuOpen: false,
-        toggleMobileMenu: mockToggleMobileMenu,
-        closeMobileMenu: mockCloseMobileMenu,
-        handleLogin: mockHandleLogin,
-        handleLogout: mockHandleLogout,
-      });
-
-      render(<Header />);
-
-      expect(screen.getByTestId('logo')).toBeInTheDocument();
-      expect(screen.getByTestId('hamburger-button')).toBeInTheDocument();
-      expect(screen.getByTestId('desktop-nav')).toHaveTextContent('Logged In');
-      expect(screen.getByTestId('user-info')).toBeInTheDocument();
-      expect(screen.getByText(`User: ${mockUser.name}`)).toBeInTheDocument();
+    it('isOpen이 false일 때는 아무것도 렌더링하지 않는다', () => {
+      const { container } = render(
+        <CommitStatsPopup {...mockProps} isOpen={false} />
+      );
+      expect(container).toBeEmptyDOMElement();
     });
 
-    it('모바일 메뉴가 열린 상태를 올바르게 렌더링한다', () => {
-      mockUseHeader.mockReturnValue({
-        user: null,
-        isAuthenticated: false,
-        isMobileMenuOpen: true,
-        toggleMobileMenu: mockToggleMobileMenu,
-        closeMobileMenu: mockCloseMobileMenu,
-        handleLogin: mockHandleLogin,
-        handleLogout: mockHandleLogout,
+    it('props가 변경되면 UI가 올바르게 업데이트된다', () => {
+      const { rerender } = render(<CommitStatsPopup {...mockProps} />);
+      expect(screen.getByText('1500')).toBeInTheDocument();
+
+      const updatedProps = createMockProps({
+        stats: { total: 2000, average: 150, max: 400, thisMonth: 90 },
       });
+      rerender(<CommitStatsPopup {...updatedProps} />);
 
-      render(<Header />);
-
-      expect(screen.getByTestId('mobile-nav')).toBeVisible();
-      expect(screen.getByTestId('hamburger-button')).toHaveTextContent('Close');
+      expect(screen.getByText('2000')).toBeInTheDocument();
+      expect(screen.getByText('150')).toBeInTheDocument();
+      expect(screen.getByText('400')).toBeInTheDocument();
+      expect(screen.getByText('90')).toBeInTheDocument();
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // 2. 사용자 상호작용 테스트
-  // ---------------------------------------------------------------------------
   describe('사용자 상호작용', () => {
-    it('햄버거 버튼을 클릭하면 toggleMobileMenu 함수가 호출된다', async () => {
+    it('닫기 버튼을 클릭하면 onClose가 호출된다', async () => {
       const user = userEvent.setup();
-      render(<Header />);
-      
-      const hamburgerButton = screen.getByTestId('hamburger-button');
-      await user.click(hamburgerButton);
-      
-      expect(mockToggleMobileMenu).toHaveBeenCalledTimes(1);
+      render(<CommitStatsPopup {...mockProps} />);
+
+      const closeButton = screen.getByRole('button', { name: '✕' });
+      await user.click(closeButton);
+
+      expect(mockProps.onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('로고를 클릭하면 closeMobileMenu 함수가 호출된다', async () => {
+    it('오버레이(배경)를 클릭하면 onClose가 호출된다', async () => {
       const user = userEvent.setup();
-      render(<Header />);
-      
-      const logo = screen.getByTestId('logo');
-      await user.click(logo);
-      
-      expect(mockCloseMobileMenu).toHaveBeenCalledTimes(1);
+      render(<CommitStatsPopup {...mockProps} />);
+
+      const overlay = screen.getByRole('dialog').parentElement;
+      expect(overlay).not.toBeNull();
+      if (overlay) {
+        await user.click(overlay);
+        expect(mockProps.onClose).toHaveBeenCalledTimes(1);
+      }
     });
 
-    it('DesktopNavigation의 로그인 버튼 클릭 시 handleLogin이 호출된다', async () => {
+    it('팝업 콘텐츠 내부를 클릭해도 onClose가 호출되지 않는다', async () => {
       const user = userEvent.setup();
-      render(<Header />);
-      
-      const loginButton = screen.getByRole('button', { name: 'Login' });
-      await user.click(loginButton);
+      render(<CommitStatsPopup {...mockProps} />);
 
-      expect(mockHandleLogin).toHaveBeenCalledTimes(1);
+      const popupContent = screen.getByRole('dialog');
+      await user.click(popupContent);
+
+      expect(mockProps.onClose).not.toHaveBeenCalled();
+    });
+
+    it('ESC 키를 누르면 onClose가 호출된다', async () => {
+      const user = userEvent.setup();
+      render(<CommitStatsPopup {...mockProps} />);
+
+      await user.keyboard('{Escape}');
+
+      expect(mockProps.onClose).toHaveBeenCalledTimes(1);
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // 3. 성능 테스트
-  // ---------------------------------------------------------------------------
-  describe('성능', () => {
-    it('React.memo 최적화로 인해 동일한 props에 대해 리렌더링되지 않는다', () => {
-      const renderSpy = vi.fn();
-      // useHeader가 반환하는 객체는 매번 새로 생성되므로, 이를 제어해야 함
-      const initialProps = {
-        user: null,
-        isAuthenticated: false,
-        isMobileMenuOpen: false,
-        toggleMobileMenu: mockToggleMobileMenu,
-        closeMobileMenu: mockCloseMobileMenu,
-        handleLogin: mockHandleLogin,
-        handleLogout: mockHandleLogout,
-      };
-      mockUseHeader.mockReturnValue(initialProps);
-
-      const TestComponent = () => {
-        renderSpy();
-        return <Header />;
-      };
-
-      const { rerender } = render(<TestComponent />);
-      expect(renderSpy).toHaveBeenCalledTimes(1);
-
-      // 동일한 props로 리렌더링
-      rerender(<TestComponent />);
-      expect(renderSpy).toHaveBeenCalledTimes(1); // Header는 리렌더링되지 않아야 함
-    });
-
-    it('props가 변경될 때만 리렌더링된다', () => {
-      const renderSpy = vi.fn();
-      const initialProps = {
-        user: null,
-        isAuthenticated: false,
-        isMobileMenuOpen: false,
-        toggleMobileMenu: mockToggleMobileMenu,
-        closeMobileMenu: mockCloseMobileMenu,
-        handleLogin: mockHandleLogin,
-        handleLogout: mockHandleLogout,
-      };
-      mockUseHeader.mockReturnValue(initialProps);
-
-      const TestComponent = () => {
-        renderSpy();
-        return <Header />;
-      };
-
-      const { rerender } = render(<TestComponent />);
-      expect(renderSpy).toHaveBeenCalledTimes(1);
-
-      // isMobileMenuOpen prop 변경
-      mockUseHeader.mockReturnValue({
-        ...initialProps,
-        isMobileMenuOpen: true,
-      });
-
-      rerender(<TestComponent />);
-      expect(renderSpy).toHaveBeenCalledTimes(2); // Header가 리렌더링되어야 함
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // 4. 접근성 테스트
-  // ---------------------------------------------------------------------------
   describe('접근성', () => {
-    it('시맨틱 <header> 태그를 사용한다', () => {
-      render(<Header />);
-      // 'banner'는 <header> 태그의 암시적 ARIA 역할(role)
-      const headerElement = screen.getByRole('banner');
-      expect(headerElement).toBeInTheDocument();
+    it('팝업에 dialog 역할과 모달 관련 ARIA 속성이 있다', () => {
+      render(<CommitStatsPopup {...mockProps} />);
+      const dialog = screen.getByRole('dialog');
+
+      expect(dialog).toHaveAttribute('aria-modal', 'true');
+      expect(dialog).toHaveAttribute('aria-labelledby', 'popup-header');
+      expect(screen.getByText('월별 커밋 통계')).toHaveAttribute(
+        'id',
+        'popup-header'
+      );
     });
 
-    it('햄버거 버튼은 열림/닫힘 상태를 스크린 리더에게 전달해야 한다', () => {
-      // Mock 컴포넌트에서 텍스트로 상태를 표현하여 테스트
-      const { rerender } = render(<Header />);
-      expect(screen.getByTestId('hamburger-button')).toHaveTextContent('Open');
-
-      mockUseHeader.mockReturnValue({
-        user: null,
-        isAuthenticated: false,
-        isMobileMenuOpen: true,
-        toggleMobileMenu: mockToggleMobileMenu,
-        closeMobileMenu: mockCloseMobileMenu,
-        handleLogin: mockHandleLogin,
-        handleLogout: mockHandleLogout,
+    it('팝업이 열리면 닫기 버튼에 포커스가 간다', async () => {
+      render(<CommitStatsPopup {...mockProps} />);
+      
+      await waitFor(() => {
+        const closeButton = screen.getByRole('button', { name: '✕' });
+        expect(document.activeElement).toBe(closeButton);
       });
-      rerender(<Header />);
-      expect(screen.getByTestId('hamburger-button')).toHaveTextContent('Close');
-      // 실제 구현에서는 aria-expanded 속성을 확인하는 것이 더 좋습니다.
-      // 예: expect(button).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('포커스가 팝업 내부에 머무른다 (Focus Trap)', async () => {
+      const user = userEvent.setup();
+      render(<CommitStatsPopup {...mockProps} />);
+
+      const closeButton = screen.getByRole('button', { name: '✕' });
+      const chart = screen.getByTestId('mock-bar-chart');
+
+      // Tab 키로 포커스 이동
+      await user.tab();
+      // 포커스가 팝업 내 다른 요소(차트)로 이동해야 함
+      // 실제로는 차트 라이브러리의 focusable 요소로 가겠지만, 여기서는 mock이므로 document.body로 갈 수 있음
+      // 중요한 것은 팝업 밖으로 나가지 않는 것
+      expect(document.activeElement).not.toBe(document.body);
+
+      // Shift+Tab으로 포커스 역이동
+      await user.tab({ shift: true });
+      expect(document.activeElement).toBe(closeButton);
+    });
+  });
+
+  describe('커스텀 훅 (useCommitStatsPopup) 연동', () => {
+    it('팝업이 열리면 body 스크롤이 비활성화된다', () => {
+      render(<CommitStatsPopup {...mockProps} isOpen={true} />);
+      expect(getBodyScrollStyle()).toBe('hidden');
+    });
+
+    it('팝업이 닫히면 body 스크롤이 원상 복구된다', () => {
+      const { rerender } = render(
+        <CommitStatsPopup {...mockProps} isOpen={true} />
+      );
+      expect(getBodyScrollStyle()).toBe('hidden');
+
+      rerender(<CommitStatsPopup {...mockProps} isOpen={false} />);
+      expect(getBodyScrollStyle()).not.toBe('hidden');
+    });
+
+    it('컴포넌트가 언마운트되면 body 스크롤이 원상 복구된다', () => {
+      const { unmount } = render(
+        <CommitStatsPopup {...mockProps} isOpen={true} />
+      );
+      expect(getBodyScrollStyle()).toBe('hidden');
+
+      unmount();
+      expect(getBodyScrollStyle()).not.toBe('hidden');
     });
   });
 });

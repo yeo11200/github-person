@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
-import styles from './CommitStatsPopup.module.scss';
+import useCommitStatsPopup from '../model/useCommitStatsPopup';
+import styles from '../CommitStatsPopup.module.scss';
 
 interface CommitStatsPopupProps {
   isOpen: boolean;
@@ -23,36 +24,7 @@ const CommitStatsPopup: React.FC<CommitStatsPopupProps> = ({
   chartData,
   chartOptions,
 }) => {
-  // 팝업이 열릴 때 body 스크롤 방지
-  useEffect(() => {
-    if (isOpen) {
-      // 현재 스크롤 위치 저장
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-    } else {
-      // 스크롤 위치 복원
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-    }
-
-    // 컴포넌트 언마운트 시 정리
-    return () => {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useCommitStatsPopup({ isOpen });
 
   if (!isOpen) return null;
 

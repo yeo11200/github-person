@@ -8,9 +8,7 @@
 │   │   └── mcp.config.json
 │   ├── inputs
 │   │   ├── code
-│   │   │   ├── DesktopNavigation.tsx
-│   │   │   ├── MobileNavigation.tsx
-│   │   │   └── UserInfo.tsx
+│   │   │   └── Header.tsx
 │   │   └── context
 │   │       └── structure.txt
 │   ├── outputs
@@ -50,7 +48,6 @@
 │       ├── refactor_prompt.txt
 │       ├── testgen_output.md
 │       └── testgen_prompt.txt
-├── gemini-mcp-example.zip
 ├── index.html
 ├── mcp-auto-run.sh
 ├── package.json
@@ -70,8 +67,9 @@
 │   ├── components
 │   │   ├── CommitStatsPopup
 │   │   │   ├── CommitStatsPopup.module.scss
-│   │   │   ├── CommitStatsPopup.tsx
-│   │   │   └── index.ts
+│   │   │   ├── index.ts
+│   │   │   ├── model
+│   │   │   └── ui
 │   │   ├── Header
 │   │   │   ├── Header.module.scss
 │   │   │   ├── index.ts
@@ -123,6 +121,8 @@
 │   ├── styles
 │   │   ├── NotFound.scss
 │   │   └── Profile.scss
+│   ├── test
+│   │   └── setup.ts
 │   ├── types
 │   │   └── apis
 │   │       ├── github-commit.ts
@@ -141,7 +141,7 @@
 ├── vercel.json
 └── vite.config.ts
 
-42 directories, 99 files
+45 directories, 96 files
 
 === React 파일 목록 ===
 ./gemini-mcp-example/outputs/refactored/src/components/Modal/ui/ModalBackdrop.tsx
@@ -154,22 +154,22 @@
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/UserInfo.test.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/MobileNavigation.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/MobileNavigation.test.tsx
+./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Header.test.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/DesktopNavigation.test.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/UserInfo.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Logo.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/Header.tsx
 ./gemini-mcp-example/outputs/refactored/src/components/Header/ui/HamburgerButton.tsx
 ./gemini-mcp-example/outputs/refactored/src/store/useMyAgent.tsx
+./node_modules/.pnpm/@testing-library+react-hooks@8.0.1_@types+react@19.1.6_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/@testing-library/react-hooks/src/__tests__/useContext.test.tsx
+./node_modules/.pnpm/@testing-library+react-hooks@8.0.1_@types+react@19.1.6_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/@testing-library/react-hooks/src/helpers/createTestHarness.tsx
 ./src/App.tsx
-./src/main.tsx
-./src/contexts/RepositoryContext.tsx
-./src/contexts/AuthContext.tsx
 
 === 패키지 정보 ===
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "test:coverage": "vitest --coverage",
+    "test:watch": "vitest --watch",
+    "husky": "husky install",
+    "prepare": "husky"
   },
   "dependencies": {
     "chart.js": "^4.5.0",
